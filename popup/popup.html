@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <h1>🕐 TZ Convert</h1>
+
+    <div class="field">
+      <label for="timeInput">Time</label>
+      <input type="text" id="timeInput" placeholder="e.g. 10:30 AM" autofocus>
+    </div>
+
+    <div class="zone-row">
+      <div class="field">
+        <label for="fromZone">From</label>
+        <select id="fromZone"></select>
+      </div>
+      <span class="swap" id="swapBtn" title="Swap">⇄</span>
+      <div class="field">
+        <label for="toZone">To</label>
+        <select id="toZone"></select>
+      </div>
+    </div>
+
+    <button id="convertBtn">Convert</button>
+
+    <div id="result" class="result" hidden>
+      <div class="result-time" id="resultTime"></div>
+      <div class="result-note" id="resultNote"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

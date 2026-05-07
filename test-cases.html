@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TZ Extension v2 — Test Cases</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#f1f5f9; --muted:#94a3b8; --accent:#f97316; --green:#22c55e; --red:#ef4444; --yellow:#eab308; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); padding:40px; line-height:1.6; }
+  h1 { font-size:28px; margin-bottom:8px; }
+  .subtitle { color:var(--muted); font-size:15px; margin-bottom:32px; }
+  .section { margin-bottom:40px; }
+  .section h2 { font-size:18px; color:var(--accent); margin-bottom:16px; }
+  .test-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(480px,1fr)); gap:16px; }
+  .test-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .test-id { font-family:monospace; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .test-input { font-size:17px; font-weight:500; margin-bottom:12px; padding:12px 16px; background:rgba(0,0,0,.25); border-radius:8px; border:1px dashed rgba(249,115,22,.2); user-select:text; }
+  .expect { display:flex; gap:8px; align-items:baseline; margin-top:8px; }
+  .expect-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); flex-shrink:0; }
+  .expect-value { font-family:monospace; font-size:13px; color:var(--green); }
+  .note { font-size:12px; color:var(--yellow); margin-top:6px; font-style:italic; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:100px; font-size:11px; font-weight:700; text-transform:uppercase; margin-left:8px; }
+  .badge-local { background:rgba(34,197,94,.15); color:var(--green); }
+  .badge-convert { background:rgba(249,115,22,.15); color:var(--accent); }
+  .badge-ambig { background:rgba(239,68,68,.15); color:var(--red); }
+  .badge-cal { background:rgba(59,130,246,.15); color:#60a5fa; }
+  .badge-edge { background:rgba(239,68,68,.15); color:var(--red); }
+  hr { border:none; height:1px; background:var(--border); margin:40px 0; }
+  .instructions { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:32px; font-size:14px; color:var(--muted); }
+  .instructions strong { color:var(--text); }
+  .instructions code { background:rgba(249,115,22,.1); color:var(--accent); padding:2px 6px; border-radius:4px; font-family:monospace; }
+  .email-sim { background:#fff; color:#1a1a1a; border-radius:12px; padding:32px; font-family:Arial,sans-serif; font-size:15px; line-height:1.7; max-width:700px; }
+  .email-sim h3 { font-size:18px; margin-bottom:16px; color:#333; }
+  .email-sim ul { margin:8px 0 8px 24px; }
+  .email-sim .highlight-me { background:#fffde7; border-bottom:2px dashed #f59e0b; padding:1px 2px; cursor:text; }
+</style>
+</head>
+<body>
+
+<h1>🕐 TZ Extension v2 — Test Cases</h1>
+<p class="subtitle">V2: Right-click → "Get My Time". No TZ = local time. Ambiguous TZ = picker. GMT+X display. Calendar button.</p>
+
+<div class="instructions">
+  <strong>How to test:</strong><br>
+  1. Load extension in <code>chrome://extensions</code> → Developer mode → Load unpacked<br>
+  2. Open this page in Edge/Chrome<br>
+  3. <strong>Select text</strong> in any dashed box → <strong>Right-click</strong> → <strong>"🕐 Get My Time"</strong><br>
+  4. Verify tooltip content matches expected behavior
+</div>
+
+<!-- ═══════════════ LOCAL TIME (no TZ) ═══════════════ -->
+<div class="section">
+  <h2>① No TZ Detected — Should Show "Already your time" <span class="badge badge-local">Local</span></h2>
+  <div class="test-grid">
+    <div class="test-card">
+      <div class="test-id">T-01 · Simple AM, no TZ</div>
+      <div class="test-input">10 AM</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 10 AM + your GMT offset</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-02 · Range, no TZ</div>
+      <div class="test-input">June 15th from 9 am – 4 pm</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 9 AM – 4 PM + your GMT offset</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-03 · 24h, no TZ</div>
+      <div class="test-input">14:00</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 2 PM + Calendar button</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ UNAMBIGUOUS CONVERSION ═══════════════ -->
+<div class="section">
+  <h2>② Unambiguous TZ — Should Convert with GMT+X <span class="badge badge-convert">Convert</span></h2>
+  <div class="test-grid">
+    <div class="test-card">
+      <div class="test-id">T-10 · CT (US Central)</div>
+      <div class="test-input">3:30 PM CT</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT-6 (CHI / DAL / MEX) → converted to your local GMT+X</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-11 · ET (US Eastern)</div>
+      <div class="test-input">9 AM ET</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT-5 (NYC / TOR / MIA) → converted</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-12 · HKT</div>
+      <div class="test-input">10:00 AM HKT</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT+8 (HK / SH / TPE) → converted (or "Same time zone" if you're in GMT+8)</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-13 · JST</div>
+      <div class="test-input">3 PM JST</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT+9 (TYO / SEL) → converted</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-14 · Date + range + TZ</div>
+      <div class="test-input">July 4th from 10 AM to 3 PM CT</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Range: source GMT-6 → converted range in your GMT+X</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-15 · GMT offset explicit</div>
+      <div class="test-input">2:00 PM GMT+5</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT+5 (KHI / TAS) → converted</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-16 · UTC offset</div>
+      <div class="test-input">10:30 AM UTC-8</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Source: GMT-8 (LAX / SEA / SFO) → converted</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ AMBIGUOUS TZ ═══════════════ -->
+<div class="section">
+  <h2>③ Ambiguous TZ — Should Show Picker <span class="badge badge-ambig">Ambiguous</span></h2>
+  <div class="test-grid">
+    <div class="test-card">
+      <div class="test-id">T-20 · CST ambiguity</div>
+      <div class="test-input">9 AM CST</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: 🇺🇸 US Central (GMT-6) | 🇨🇳 China (GMT+8) | 🇦🇺 Australia (GMT+9:30)</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-21 · EST ambiguity</div>
+      <div class="test-input">2 PM EST</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: 🇺🇸 US Eastern (GMT-5) | 🇦🇺 Australia (GMT+10)</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-22 · IST ambiguity</div>
+      <div class="test-input">11:30 AM IST</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: 🇮🇳 India (GMT+5:30) | 🇮🇱 Israel (GMT+2) | 🇮🇪 Ireland (GMT+1)</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-23 · PST ambiguity</div>
+      <div class="test-input">8 AM PST</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: 🇺🇸 US Pacific (GMT-8) | 🇵🇭 Philippines (GMT+8)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EDGE CASES ═══════════════ -->
+<div class="section">
+  <h2>④ Edge Cases <span class="badge badge-edge">Edge</span></h2>
+  <div class="test-grid">
+    <div class="test-card">
+      <div class="test-id">T-30 · Not a time</div>
+      <div class="test-input">I have 15 apples and 20 oranges</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"No time detected"</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-31 · Date only, no time</div>
+      <div class="test-input">June 15th</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"No time detected"</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-32 · Midnight ET</div>
+      <div class="test-input">12 AM ET</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">12:00 AM converted from GMT-5</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-33 · Parenthetical ignored</div>
+      <div class="test-input">June 15th from 9 am – 4 pm (with happy hour at 5 pm)</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" — range 9 AM – 4 PM (parenthetical stripped)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ CALENDAR ═══════════════ -->
+<div class="section">
+  <h2>⑤ Google Calendar Button <span class="badge badge-cal">Calendar</span></h2>
+  <div class="test-grid">
+    <div class="test-card">
+      <div class="test-id">T-40 · Calendar with date + range</div>
+      <div class="test-input">Sep 22 from 2 PM to 5 PM CT</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Tooltip shows converted range + "📅 Add to Google Calendar" button</span></div>
+      <div class="note">Clicking the button should open Google Calendar with Sep 22 2PM–5PM CT pre-filled</div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-41 · Calendar with single time (default 60 min)</div>
+      <div class="test-input">July 10th at 3 PM ET</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Calendar event: Jul 10 3PM–4PM ET (60 min default)</span></div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══════════════ REAL EMAIL SIMULATION ═══════════════ -->
+<div class="section">
+  <h2>⑥ Real-World Email Simulation</h2>
+  <div class="email-sim">
+    <h3>📧 Mini-ACE Program — Kellogg Global Experience</h3>
+    <p>Mini-ACE is a one day, immersion program designed to help international students build confidence in the American classroom.</p>
+    <ul>
+      <li><strong>Mini-ACE Schedule:</strong> <span class="highlight-me">June 15th from 9 am – 4 pm (with happy hour at 5 pm)</span></li>
+    </ul>
+    <br>
+    <p>Orientation kickoff: <span class="highlight-me">July 20th at 2 PM CT</span></p>
+    <p>Virtual info session: <span class="highlight-me">Thursday at 10 AM EST</span></p>
+    <p>Office hours: <span class="highlight-me">Monday 9:00 AM – 11:30 AM CT</span></p>
+  </div>
+</div>
+
+</body>
+</html>
