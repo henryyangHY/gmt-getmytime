@@ -106,6 +106,32 @@
   const MONTH_MAP = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
   const NUMERIC_DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
 
+  // ── Timezone-to-cities mapping (DST-safe) ──
+  const TZ_CITIES = {
+    'America/New_York':      'NYC / TOR / MIA',
+    'America/Chicago':       'CHI / DAL / MEX',
+    'America/Denver':        'DEN / PHX',
+    'America/Los_Angeles':   'LAX / SEA / SFO',
+    'America/Halifax':       'HAL / SJU',
+    'Europe/London':         'LON / LIS',
+    'Europe/Paris':          'PAR / BER / MAD',
+    'Europe/Dublin':         'DUB',
+    'Asia/Hong_Kong':        'HK / SH / TPE',
+    'Asia/Shanghai':         'HK / SH / TPE',
+    'Asia/Singapore':        'SIN',
+    'Asia/Manila':           'MNL',
+    'Asia/Kuala_Lumpur':     'KUL',
+    'Asia/Tokyo':            'TYO / SEL',
+    'Asia/Seoul':            'TYO / SEL',
+    'Asia/Kolkata':          'DEL / BOM / CCU',
+    'Asia/Jerusalem':        'TLV',
+    'Asia/Riyadh':           'RUH / MOW / NAI',
+    'Asia/Dhaka':            'DAC / ALA',
+    'Australia/Sydney':      'SYD / MEL',
+    'Australia/Adelaide':    'ADL',
+    'Pacific/Auckland':      'AKL / FJI',
+  };
+
   let localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   // ── Regex patterns ──
@@ -264,7 +290,7 @@
     const frac = absH - whole;
     let str = `GMT${sign}${whole}`;
     if (frac > 0.01) str += `:${String(Math.round(frac * 60)).padStart(2, '0')}`;
-    const cities = OFFSET_CITIES[String(h)];
+    const cities = TZ_CITIES[tz] || OFFSET_CITIES[String(h)];
     if (cities) str += ` (${cities})`;
     return str;
   }
@@ -276,9 +302,10 @@
     } else {
       refStr = new Date().toLocaleDateString('en-CA', { timeZone: sourceZone });
     }
-    const sourceDate = new Date(`${refStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00`);
-    const srcOff = getOffsetMinutes(sourceDate, sourceZone);
-    const utcMs = sourceDate.getTime() + srcOff * 60000;
+    // Parse as UTC (append Z) to avoid local timezone interference
+    const utcBase = new Date(`${refStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00Z`);
+    const srcOff = getOffsetMinutes(utcBase, sourceZone);
+    const utcMs = utcBase.getTime() + srcOff * 60000;
 
     const localOff = getOffsetMinutes(new Date(utcMs), localZone);
     const srcOffAtTime = getOffsetMinutes(new Date(utcMs), sourceZone);
@@ -311,15 +338,15 @@
     const refStr = `${refDate.year}-${String(refDate.month + 1).padStart(2,'0')}-${String(refDate.day).padStart(2,'0')}`;
 
     const t0 = parsed.times[0];
-    const startSource = new Date(`${refStr}T${String(t0.hour).padStart(2,'0')}:${String(t0.minute).padStart(2,'0')}:00`);
-    const srcOff = getOffsetMinutes(startSource, sourceZone);
-    const startUtcMs = startSource.getTime() + srcOff * 60000;
+    // Parse as UTC (append Z) to avoid local timezone interference
+    const startUtcBase = new Date(`${refStr}T${String(t0.hour).padStart(2,'0')}:${String(t0.minute).padStart(2,'0')}:00Z`);
+    const startUtcMs = startUtcBase.getTime() + getOffsetMinutes(startUtcBase, sourceZone) * 60000;
 
     let endUtcMs;
     if (parsed.type === 'range' && parsed.times[1]) {
       const t1 = parsed.times[1];
-      const endSource = new Date(`${refStr}T${String(t1.hour).padStart(2,'0')}:${String(t1.minute).padStart(2,'0')}:00`);
-      endUtcMs = endSource.getTime() + getOffsetMinutes(endSource, sourceZone) * 60000;
+      const endUtcBase = new Date(`${refStr}T${String(t1.hour).padStart(2,'0')}:${String(t1.minute).padStart(2,'0')}:00Z`);
+      endUtcMs = endUtcBase.getTime() + getOffsetMinutes(endUtcBase, sourceZone) * 60000;
       if (endUtcMs <= startUtcMs) endUtcMs += 86400000;
     } else {
       endUtcMs = startUtcMs + 3600000;
