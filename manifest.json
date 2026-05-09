@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GMT — GetMyTime",
+  "name": "GMT(Get My Time) 時差轉換擴充插件",
   "version": "1.0.0",
-  "description": "Right-click any highlighted time to convert it to your local time zone. Handles ambiguous TZ abbreviations, time ranges, and Google Calendar integration.",
+  "description": "選取時間、右鍵轉換、一鍵加日曆 — Right-click to convert time zones. Handles ambiguous TZ, ranges, DST & Google Calendar.",
   "permissions": ["activeTab", "storage", "contextMenus"],
   "action": {
     "default_popup": "popup/popup.html",

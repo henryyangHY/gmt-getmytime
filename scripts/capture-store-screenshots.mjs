@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const EXTENSION_PATH = __dirname;
+const EXTENSION_PATH = path.resolve(__dirname, '..');
 const TEST_PAGE = `file:///${path.resolve(__dirname, 'test-cases.html').replace(/\\/g, '/')}`;
-const SHOT_DIR = path.resolve(__dirname, 'screenshots');
+const SHOT_DIR = path.resolve(__dirname, '..', 'docs', 'screenshots');
 
 const SCENARIOS = [
   {
