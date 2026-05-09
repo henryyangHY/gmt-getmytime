@@ -51,22 +51,33 @@
 
 <!-- ═══════════════ LOCAL TIME (no TZ) ═══════════════ -->
 <div class="section">
-  <h2>① No TZ Detected — Should Show "Already your time" <span class="badge badge-local">Local</span></h2>
+  <h2>① No TZ Detected — Should Show Timezone Picker <span class="badge badge-local">No-TZ Picker</span></h2>
   <div class="test-grid">
     <div class="test-card">
       <div class="test-id">T-01 · Simple AM, no TZ</div>
       <div class="test-input">10 AM</div>
-      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 10 AM + your GMT offset</span></div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" + TZ options + "It's already my time"</span></div>
     </div>
     <div class="test-card">
       <div class="test-id">T-02 · Range, no TZ</div>
       <div class="test-input">June 15th from 9 am – 4 pm</div>
-      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 9 AM – 4 PM + your GMT offset</span></div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" — click a TZ to convert, or "It's already my time"</span></div>
     </div>
     <div class="test-card">
       <div class="test-id">T-03 · 24h, no TZ</div>
       <div class="test-input">14:00</div>
-      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" + 2 PM + Calendar button</span></div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" — select TZ or confirm local</span></div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-04 · Numeric date + range, no TZ (Kellogg email style)</div>
+      <div class="test-input">5/13/2026 | 1:00 PM – 4:00 PM</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" — pick US Central (CHI / DAL / MEX) → shows converted 1 PM – 4 PM CT</span></div>
+      <div class="note">Previously showed "5 AM – 4 PM" due to numeric date parsing bug (fixed)</div>
+    </div>
+    <div class="test-card">
+      <div class="test-id">T-05 · Numeric date + single time, no TZ</div>
+      <div class="test-input">5/20/2026 | 11:00 AM – 12:30 PM</div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" — pick TZ to convert range</span></div>
     </div>
   </div>
 </div>
@@ -162,7 +173,7 @@
     <div class="test-card">
       <div class="test-id">T-33 · Parenthetical ignored</div>
       <div class="test-input">June 15th from 9 am – 4 pm (with happy hour at 5 pm)</div>
-      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">"Already your time" — range 9 AM – 4 PM (parenthetical stripped)</span></div>
+      <div class="expect"><span class="expect-label">Expected:</span><span class="expect-value">Picker: "No timezone detected" — range 9 AM – 4 PM (parenthetical stripped)</span></div>
     </div>
   </div>
 </div>
@@ -191,6 +202,19 @@
 <div class="section">
   <h2>⑥ Real-World Email Simulation</h2>
   <div class="email-sim">
+    <h3>📧 International Student Onboarding Series — Kellogg Global Experience</h3>
+    <p>Dear Henry,</p>
+    <p>The start of your program is going to be here before you know it! We hope you will join us for one of our upcoming May events.</p>
+    <br>
+    <p><strong>Upcoming Webinars</strong></p>
+    <ul>
+      <li><span class="highlight-me">5/13/2026 | 1:00 PM – 4:00 PM</span><br>ACE Office Hours | No registration required</li>
+      <li><span class="highlight-me">5/20/2026 | 11:00 AM – 12:30 PM</span><br>Navigating the U.S. Visa Journey (Session 1)</li>
+      <li><span class="highlight-me">5/21/2026 | 6:00 PM – 7:30 PM</span><br>Navigating the U.S. Visa Journey (Session 2)</li>
+    </ul>
+    <div class="note">⬆️ These times have NO timezone — picker should appear. Pick "US Central (CHI / DAL / MEX)" or "US Eastern (NYC / TOR / MIA)" to convert.</div>
+
+    <br>
     <h3>📧 Mini-ACE Program — Kellogg Global Experience</h3>
     <p>Mini-ACE is a one day, immersion program designed to help international students build confidence in the American classroom.</p>
     <ul>

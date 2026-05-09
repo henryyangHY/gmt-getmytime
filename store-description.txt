@@ -1,0 +1,76 @@
+GMT (Get My Time) — Instant Time Zone Converter | 即時時差轉換工具
+
+The most annoying part of working across time zones: someone writes "3 PM CT" and you have to do mental math. Even worse, many emails don't include a timezone at all.
+
+跨時區工作最煩的事：收到信寫著「3 PM CT」，你得心算那是你的幾點。更煩的是，很多 Email 根本沒寫時區。
+
+GMT (GetMyTime) lets you highlight any time text on any webpage, right-click, and instantly see it in your local time. Built for professionals and students navigating between US and Asian time zones.
+
+GMT (GetMyTime) 讓你在任何網頁上圈選時間文字、右鍵一點，瞬間看到你的當地時間。專為跨美亞時區的上班族和留學生打造。
+
+---
+
+HOW IT WORKS | 使用方式
+
+1. Select any time text on a webpage (e.g. "3:30 PM CT", "5/13/2026 | 1:00 PM – 4:00 PM")
+   在網頁上選取任何時間文字（例如「3:30 PM CT」、「5/13/2026 | 1:00 PM – 4:00 PM」）
+
+2. Right-click → "🕐 Get My Time"
+   按右鍵 → 點選「🕐 Get My Time」
+
+3. See the converted time in your local timezone instantly
+   立即看到轉換後的當地時間
+
+---
+
+FEATURES | 功能特色
+
+• Right-click to convert — Select text → Right-click → "🕐 Get My Time"
+  右鍵即轉換 — 選取文字 → 右鍵 → 「🕐 Get My Time」
+
+• Smart TZ detection — Recognizes CT, ET, PT, HKT, JST, GMT+X, and 20+ timezone formats
+  智慧時區偵測 — 支援 CT、ET、PT、HKT、JST、GMT+X 等 20+ 種時區格式
+
+• No timezone? No problem — When no TZ is detected, pick the source timezone from a list of common options (NYC, CHI, LAX, HK, TYO, etc.)
+  沒寫時區也能轉 — 偵測不到時區時，從常用選單中指定來源時區（NYC、CHI、LAX、HK、TYO 等）
+
+• Ambiguity handling — CST, EST, IST and other ambiguous abbreviations show a picker so you choose the right one
+  模糊時區處理 — CST、EST、IST 等容易搞混的縮寫會跳出選擇器讓你挑
+
+• Time ranges — Handles "9 AM – 4 PM", "10:00 to 14:30", and similar patterns
+  支援時間範圍 — 能處理「9 AM – 4 PM」、「10:00 to 14:30」等格式
+
+• Date-aware — Parses "June 15th at 10 AM CT", "5/13/2026 | 1 PM", and more
+  看得懂日期 — 能解析「June 15th at 10 AM CT」、「5/13/2026 | 1 PM」等格式
+
+• DST auto-handled — Uses browser's Intl.DateTimeFormat for accurate daylight saving time
+  自動處理日光節約 — 透過瀏覽器原生 API 精準處理 DST
+
+• Google Calendar — One-click "Add to Google Calendar" button in every tooltip
+  一鍵加入 Google 日曆 — 每個轉換結果都附上日曆按鈕
+
+• GMT+X display — Shows "GMT-6 (CHI / DAL / MEX)" for quick context
+  GMT+X 顯示 — 顯示「GMT-6 (CHI / DAL / MEX)」方便快速辨識
+
+• Zero frameworks — Pure Vanilla JS, ultra-lightweight, no external dependencies
+  零框架 — 純 Vanilla JS，超輕量，無任何外部依賴
+
+---
+
+PERFECT FOR | 適合誰
+
+• International students preparing for US programs
+  準備赴美的國際學生
+
+• Remote workers across US / Asia / Europe time zones
+  跨美亞歐時區的遠端工作者
+
+• Anyone tired of mental math when reading emails with time references
+  任何厭倦看到時間就要心算的人
+
+---
+
+Privacy | 隱私聲明
+
+This extension runs entirely in your browser. No data is collected, stored, or sent to any server.
+此擴充功能完全在瀏覽器內運行，不收集、不儲存、不傳送任何資料至外部伺服器。

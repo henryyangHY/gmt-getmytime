@@ -106,3 +106,13 @@
 .tz-ext-cal-btn:hover {
   background: rgba(249, 115, 22, .22);
 }
+
+/* No-TZ "It's already my time" button */
+.tz-ext-local-opt {
+  border-color: rgba(34, 197, 94, .3) !important;
+  color: #22c55e !important;
+}
+.tz-ext-local-opt:hover {
+  border-color: #22c55e !important;
+  background: rgba(34, 197, 94, .08) !important;
+}

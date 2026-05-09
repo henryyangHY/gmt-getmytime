@@ -104,6 +104,7 @@
   const ALL_TZ_ABBRS = [...Object.keys(TZ_UNAMBIGUOUS), ...Object.keys(TZ_AMBIGUOUS)];
   const MONTHS = 'Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?';
   const MONTH_MAP = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+  const NUMERIC_DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
 
   let localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -138,14 +139,30 @@
   }
 
   function parseDate(text) {
+    // Try named month format: "May 13, 2026"
     const m = text.match(DATE_PREFIX_RE);
-    if (!m) return null;
-    const month = MONTH_MAP[m[1].substring(0, 3).toLowerCase()];
-    if (month === undefined) return null;
-    const day = parseInt(m[2], 10);
-    if (day < 1 || day > 31) return null;
-    const year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
-    return { month, day, year };
+    if (m) {
+      const month = MONTH_MAP[m[1].substring(0, 3).toLowerCase()];
+      if (month !== undefined) {
+        const day = parseInt(m[2], 10);
+        if (day >= 1 && day <= 31) {
+          const year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
+          return { month, day, year };
+        }
+      }
+    }
+    // Try numeric format: M/D/YYYY or MM/DD/YYYY
+    const n = text.match(NUMERIC_DATE_RE);
+    if (n) {
+      const month = parseInt(n[1], 10) - 1;
+      const day = parseInt(n[2], 10);
+      let year = parseInt(n[3], 10);
+      if (year < 100) year += 2000;
+      if (month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+        return { month, day, year };
+      }
+    }
+    return null;
   }
 
   function extractTzFromText(text) {
@@ -170,8 +187,8 @@
   }
 
   function extractTimePortion(text) {
-    let cleaned = text.replace(DATE_PREFIX_RE, '').trim();
-    cleaned = cleaned.replace(/^(?:from|at|,)\s*/i, '').trim();
+    let cleaned = text.replace(DATE_PREFIX_RE, '').replace(NUMERIC_DATE_RE, '').trim();
+    cleaned = cleaned.replace(/^(?:from|at|,|\|)\s*/i, '').trim();
     return cleaned;
   }
 
@@ -422,6 +439,42 @@
     });
   }
 
+  // ── No-TZ Fallback picker ──
+  const FALLBACK_TZ_OPTIONS = [
+    { label: '🇺🇸 US Eastern (NYC / TOR / MIA)',     iana: 'America/New_York' },
+    { label: '🇺🇸 US Central (CHI / DAL / MEX)',     iana: 'America/Chicago' },
+    { label: '🇺🇸 US Mountain (DEN / PHX)',          iana: 'America/Denver' },
+    { label: '🇺🇸 US Pacific (LAX / SEA / SFO)',     iana: 'America/Los_Angeles' },
+    { label: '🇬🇧 UK (LON / LIS)',                   iana: 'Europe/London' },
+    { label: '🇪🇺 Central Europe (PAR / BER / MAD)', iana: 'Europe/Paris' },
+    { label: '🇭🇰 Hong Kong / China (HK / SH / TPE)', iana: 'Asia/Hong_Kong' },
+    { label: '🇯🇵 Japan (TYO / SEL)',                iana: 'Asia/Tokyo' },
+    { label: '🇮🇳 India (DEL / BOM / CCU)',          iana: 'Asia/Kolkata' },
+    { label: '🇦🇺 Australia Eastern (SYD / MEL)',    iana: 'Australia/Sydney' },
+  ];
+
+  function showNoTzPicker(parsed) {
+    let html = `<div class="tz-ext-label">⏰ No timezone detected — where is this from?</div>`;
+    FALLBACK_TZ_OPTIONS.forEach((opt, i) => {
+      html += `<button class="tz-ext-amb-btn" data-idx="${i}">${opt.label}</button>`;
+    });
+    html += `<button class="tz-ext-amb-btn tz-ext-local-opt" data-idx="local">✓ It's already my time</button>`;
+    showTooltipAtSelection(html);
+    tooltip.style.pointerEvents = 'auto';
+    tooltip.querySelectorAll('.tz-ext-amb-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = btn.dataset.idx;
+        if (idx === 'local') {
+          showResult(parsed, localZone);
+        } else {
+          parsed.isLocalTime = false;
+          showResult(parsed, FALLBACK_TZ_OPTIONS[parseInt(idx, 10)].iana);
+        }
+      });
+    });
+  }
+
   // ── Handle conversion ──
   function handleConvert(text) {
     const parsed = parseTimeString(text);
@@ -430,7 +483,7 @@
       return;
     }
     if (parsed.isLocalTime) {
-      showResult(parsed, localZone);
+      showNoTzPicker(parsed);
       return;
     }
     const tzInfo = parsed.tzInfo;

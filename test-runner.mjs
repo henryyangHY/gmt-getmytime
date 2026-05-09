@@ -10,10 +10,12 @@ const EXTENSION_PATH = __dirname;
 const TEST_PAGE = `file:///${path.resolve(__dirname, 'test-cases.html').replace(/\\/g, '/')}`;
 
 const TESTS = [
-  // ① Local time (no TZ)
-  { id: 'T-01', text: '10 AM',                                                     expectBadge: 'local', expectContains: ['Already', '10'] },
-  { id: 'T-02', text: 'June 15th from 9 am – 4 pm',                                expectBadge: 'local', expectContains: ['Already', '9', '4'] },
-  { id: 'T-03', text: '14:00',                                                     expectBadge: 'local', expectContains: ['Already'] },
+  // ① No TZ — should show no-TZ picker
+  { id: 'T-01', text: '10 AM',                                                     expectBadge: 'notz', expectContains: ['No timezone detected', 'already my time'] },
+  { id: 'T-02', text: 'June 15th from 9 am – 4 pm',                                expectBadge: 'notz', expectContains: ['No timezone detected', 'US Central'] },
+  { id: 'T-03', text: '14:00',                                                     expectBadge: 'notz', expectContains: ['No timezone detected'] },
+  { id: 'T-04', text: '5/13/2026 | 1:00 PM – 4:00 PM',                             expectBadge: 'notz', expectContains: ['No timezone detected', 'CHI'] },
+  { id: 'T-05', text: '5/20/2026 | 11:00 AM – 12:30 PM',                           expectBadge: 'notz', expectContains: ['No timezone detected'] },
 
   // ② Unambiguous TZ — convert with GMT+X
   { id: 'T-10', text: '3:30 PM CT',        expectBadge: null, expectContains: ['GMT'] },
@@ -32,7 +34,7 @@ const TESTS = [
   { id: 'T-30', text: 'I have 15 apples and 20 oranges', expectBadge: 'notime', expectContains: ['No time'] },
   { id: 'T-31', text: 'June 15th',                       expectBadge: 'notime', expectContains: ['No time'] },
   { id: 'T-32', text: '12 AM ET',                        expectBadge: null,     expectContains: ['GMT'] },
-  { id: 'T-33', text: 'June 15th from 9 am – 4 pm (with happy hour at 5 pm)',  expectBadge: 'local', expectContains: ['Already', '9', '4'] },
+  { id: 'T-33', text: 'June 15th from 9 am – 4 pm (with happy hour at 5 pm)',  expectBadge: 'notz', expectContains: ['No timezone detected', 'already my time'] },
 
   // ⑤ Calendar button
   { id: 'T-40', text: 'Sep 22 from 2 PM to 5 PM CT',    expectBadge: null, expectContains: ['Calendar'], expectCalendar: true },
@@ -64,7 +66,7 @@ async function triggerConversion(page, text) {
 }
 
 async function getTooltip(page) {
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1200);
   return await page.evaluate(() => {
     const t = document.querySelector('.tz-ext-tooltip');
     if (!t) return null;
@@ -83,7 +85,7 @@ async function dismiss(page) {
     document.querySelector('.tz-ext-tooltip')?.remove();
     window.getSelection()?.removeAllRanges();
   });
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(600);
 }
 
 (async () => {
@@ -119,6 +121,8 @@ async function dismiss(page) {
     // Badge checks
     if (test.expectBadge === 'notime') {
       if (!tip || !tip.text.includes('No time')) { pass = false; reason = `expected "No time", got "${tip?.text || '(none)'}"`; }
+    } else if (test.expectBadge === 'notz') {
+      if (!tip || !tip.hasAmbiguity || !tip.text.includes('No timezone detected')) { pass = false; reason = `expected no-TZ picker, got "${tip?.text?.substring(0, 80) || '(none)'}"`; }
     } else if (test.expectBadge === 'local') {
       if (!tip || !tip.hasLocalBadge) { pass = false; reason = `expected local badge, got "${tip?.text || '(none)'}"`; }
     } else if (test.expectBadge === 'ambig') {
