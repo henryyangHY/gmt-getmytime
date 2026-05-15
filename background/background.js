@@ -5,28 +5,60 @@ const DEFAULTS = {
   fallbackZone: 'America/Chicago',
 };
 
-// Create context menu on install
-chrome.runtime.onInstalled.addListener(() => {
+const MENU_ID = 'tz-get-my-time';
+
+function registerContextMenu() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
-      id: 'tz-get-my-time',
+      id: MENU_ID,
       title: '🕐 Get My Time',
       contexts: ['selection'],
     });
   });
+}
 
+// Re-create the menu on install/update AND on every browser startup, so the
+// item never goes missing even if Chrome's persistence misbehaves.
+chrome.runtime.onInstalled.addListener(() => {
+  registerContextMenu();
   chrome.storage.sync.get(['fallbackZone'], (result) => {
     chrome.storage.sync.set({ ...DEFAULTS, ...result });
   });
 });
+chrome.runtime.onStartup.addListener(registerContextMenu);
+
+// Send a message to a tab; if the content script isn't there (orphaned after
+// extension reload, or page loaded before install), inject it on demand and retry.
+async function sendWithAutoInject(tabId, message) {
+  try {
+    await chrome.tabs.sendMessage(tabId, message);
+    return;
+  } catch (e) {
+    // Receiving end missing — try to inject the content script + CSS, then retry.
+  }
+  try {
+    await chrome.scripting.insertCSS({
+      target: { tabId },
+      files: ['content/content.css'],
+    });
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['content/content.js'],
+    });
+    await chrome.tabs.sendMessage(tabId, message);
+  } catch (e) {
+    // Injection blocked (e.g., chrome:// pages, Web Store, PDF viewer, file:// without permission).
+    console.warn('[GMT] Could not deliver to tab', tabId, '—', e?.message || e);
+  }
+}
 
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'tz-get-my-time' && info.selectionText && tab?.id) {
-    chrome.tabs.sendMessage(tab.id, {
+  if (info.menuItemId === MENU_ID && info.selectionText && tab?.id) {
+    sendWithAutoInject(tab.id, {
       type: 'CONVERT_SELECTION',
       text: info.selectionText,
-    });
+    }).catch((e) => console.warn('[GMT] menu click handler:', e?.message || e));
   }
 });
 
@@ -40,9 +72,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   // Test support: forward conversion request back to the same tab's content script
   if (msg.type === 'TEST_CONVERT' && sender.tab?.id) {
-    chrome.tabs.sendMessage(sender.tab.id, {
+    sendWithAutoInject(sender.tab.id, {
       type: 'CONVERT_SELECTION',
       text: msg.text,
-    });
+    }).catch((e) => console.warn('[GMT] TEST_CONVERT relay:', e?.message || e));
   }
 });

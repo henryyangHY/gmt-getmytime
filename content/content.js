@@ -4,6 +4,11 @@
 (() => {
   'use strict';
 
+  // Idempotency guard: avoid double-initialization if the script gets re-injected
+  // (e.g., by the background's auto-inject fallback after extension reload).
+  if (window.__tz_ext_v2_initialized) return;
+  window.__tz_ext_v2_initialized = true;
+
   // ── City labels for GMT offsets ──
   const OFFSET_CITIES = {
     '-12':  'BIK',
@@ -385,19 +390,42 @@
     tooltip.innerHTML = html;
     document.body.appendChild(tooltip);
 
+    const margin = 8;
+    const gap = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
     const sel = window.getSelection();
-    let x = window.innerWidth / 2, y = window.innerHeight / 2;
+    let anchorX = vw / 2, anchorTop = vh / 2, anchorBottom = vh / 2;
     if (sel && sel.rangeCount > 0) {
       const rect = sel.getRangeAt(0).getBoundingClientRect();
-      x = rect.left + rect.width / 2;
-      y = rect.top;
+      anchorX = rect.left + rect.width / 2;
+      anchorTop = rect.top;
+      anchorBottom = rect.bottom;
     }
+
+    // Decide above vs below: prefer above if it fits naturally, else use whichever side has more room.
+    const naturalH = tooltip.getBoundingClientRect().height;
+    const spaceAbove = anchorTop - margin - gap;
+    const spaceBelow = vh - anchorBottom - margin - gap;
+    let placeBelow;
+    if (naturalH <= spaceAbove) placeBelow = false;
+    else if (naturalH <= spaceBelow) placeBelow = true;
+    else placeBelow = spaceBelow > spaceAbove;
+
+    // Cap height to fit chosen side; CSS handles internal scroll.
+    const maxH = Math.max(160, placeBelow ? spaceBelow : spaceAbove);
+    tooltip.style.maxHeight = `${maxH}px`;
+
     const tRect = tooltip.getBoundingClientRect();
-    let left = x - tRect.width / 2;
-    let top = y - tRect.height - 10;
-    if (left < 8) left = 8;
-    if (left + tRect.width > window.innerWidth - 8) left = window.innerWidth - tRect.width - 8;
-    if (top < 8) top = y + 30;
+    let left = anchorX - tRect.width / 2;
+    if (left < margin) left = margin;
+    if (left + tRect.width > vw - margin) left = vw - tRect.width - margin;
+
+    let top = placeBelow ? (anchorBottom + gap) : (anchorTop - tRect.height - gap);
+    if (top < margin) top = margin;
+    if (top + tRect.height > vh - margin) top = vh - tRect.height - margin;
+
     tooltip.style.left = `${left + window.scrollX}px`;
     tooltip.style.top = `${top + window.scrollY}px`;
     tooltip.style.opacity = '1';

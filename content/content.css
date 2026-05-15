@@ -16,6 +16,19 @@
   transform: translateY(6px);
   transition: opacity .18s ease, transform .18s ease;
   max-width: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Dark scrollbar to match theme */
+.tz-ext-tooltip::-webkit-scrollbar { width: 8px; }
+.tz-ext-tooltip::-webkit-scrollbar-track { background: transparent; }
+.tz-ext-tooltip::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, .25);
+  border-radius: 4px;
+}
+.tz-ext-tooltip::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, .45);
 }
 
 .tz-ext-row {
