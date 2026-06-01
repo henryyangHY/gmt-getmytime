@@ -11,7 +11,7 @@ function registerContextMenu() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_ID,
-      title: '🕐 Get My Time',
+      title: 'GMT · Convert this time',
       contexts: ['selection'],
     });
   });

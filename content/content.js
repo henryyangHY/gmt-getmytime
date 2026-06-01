@@ -71,38 +71,38 @@
 
   const TZ_AMBIGUOUS = {
     'CST': [
-      { label: '🇺🇸 US Central (GMT-6)', iana: 'America/Chicago' },
-      { label: '🇨🇳 China (GMT+8)',       iana: 'Asia/Shanghai' },
-      { label: '🇦🇺 Australia (GMT+9:30)',iana: 'Australia/Adelaide' },
+      { label: 'US Central (GMT-6)',     iana: 'America/Chicago' },
+      { label: 'China (GMT+8)',          iana: 'Asia/Shanghai' },
+      { label: 'Australia (GMT+9:30)',   iana: 'Australia/Adelaide' },
     ],
     'EST': [
-      { label: '🇺🇸 US Eastern (GMT-5)', iana: 'America/New_York' },
-      { label: '🇦🇺 Australia (GMT+10)', iana: 'Australia/Sydney' },
+      { label: 'US Eastern (GMT-5)',     iana: 'America/New_York' },
+      { label: 'Australia (GMT+10)',     iana: 'Australia/Sydney' },
     ],
     'IST': [
-      { label: '🇮🇳 India (GMT+5:30)',    iana: 'Asia/Kolkata' },
-      { label: '🇮🇱 Israel (GMT+2)',      iana: 'Asia/Jerusalem' },
-      { label: '🇮🇪 Ireland (GMT+1)',     iana: 'Europe/Dublin' },
+      { label: 'India (GMT+5:30)',       iana: 'Asia/Kolkata' },
+      { label: 'Israel (GMT+2)',         iana: 'Asia/Jerusalem' },
+      { label: 'Ireland (GMT+1)',        iana: 'Europe/Dublin' },
     ],
     'BST': [
-      { label: '🇬🇧 British Summer (GMT+1)', iana: 'Europe/London' },
-      { label: '🇧🇩 Bangladesh (GMT+6)',      iana: 'Asia/Dhaka' },
+      { label: 'British Summer (GMT+1)', iana: 'Europe/London' },
+      { label: 'Bangladesh (GMT+6)',     iana: 'Asia/Dhaka' },
     ],
     'AST': [
-      { label: '🇨🇦 Atlantic (GMT-4)',   iana: 'America/Halifax' },
-      { label: '🇸🇦 Arabian (GMT+3)',    iana: 'Asia/Riyadh' },
+      { label: 'Atlantic (GMT-4)',       iana: 'America/Halifax' },
+      { label: 'Arabian (GMT+3)',        iana: 'Asia/Riyadh' },
     ],
     'PST': [
-      { label: '🇺🇸 US Pacific (GMT-8)', iana: 'America/Los_Angeles' },
-      { label: '🇵🇭 Philippines (GMT+8)',iana: 'Asia/Manila' },
+      { label: 'US Pacific (GMT-8)',     iana: 'America/Los_Angeles' },
+      { label: 'Philippines (GMT+8)',    iana: 'Asia/Manila' },
     ],
     'MST': [
-      { label: '🇺🇸 US Mountain (GMT-7)',iana: 'America/Denver' },
-      { label: '🇲🇾 Malaysia (GMT+8)',   iana: 'Asia/Kuala_Lumpur' },
+      { label: 'US Mountain (GMT-7)',    iana: 'America/Denver' },
+      { label: 'Malaysia (GMT+8)',       iana: 'Asia/Kuala_Lumpur' },
     ],
     'SST': [
-      { label: '🇸🇬 Singapore (GMT+8)',  iana: 'Asia/Singapore' },
-      { label: '🇼🇸 Samoa (GMT-11)',     iana: 'Pacific/Pago_Pago' },
+      { label: 'Singapore (GMT+8)',      iana: 'Asia/Singapore' },
+      { label: 'Samoa (GMT-11)',         iana: 'Pacific/Pago_Pago' },
     ],
   };
 
@@ -473,13 +473,13 @@
 
     // Calendar button
     const calUrl = buildCalendarUrl(parsed, sourceZone);
-    rows += `<div class="tz-ext-divider"></div><a class="tz-ext-cal-btn" href="${calUrl}" target="_blank" rel="noopener">📅 Add to Google Calendar</a>`;
+    rows += `<div class="tz-ext-divider"></div><a class="tz-ext-cal-btn" href="${calUrl}" target="_blank" rel="noopener">Add to Google Calendar &rarr;</a>`;
     showTooltipAtSelection(rows);
   }
 
   // ── Ambiguity picker ──
   function showAmbiguityPicker(parsed, options, abbr) {
-    let html = `<div class="tz-ext-label">⚠️ "${abbr}" is ambiguous — pick one:</div>`;
+    let html = `<div class="tz-ext-label">Ambiguous &mdash; "${abbr}" matches multiple zones</div>`;
     options.forEach((opt, i) => {
       html += `<button class="tz-ext-amb-btn" data-idx="${i}">${opt.label}</button>`;
     });
@@ -496,24 +496,24 @@
 
   // ── No-TZ Fallback picker ──
   const FALLBACK_TZ_OPTIONS = [
-    { label: '🇺🇸 US Eastern (NYC / TOR / MIA)',     iana: 'America/New_York' },
-    { label: '🇺🇸 US Central (CHI / DAL / MEX)',     iana: 'America/Chicago' },
-    { label: '🇺🇸 US Mountain (DEN / PHX)',          iana: 'America/Denver' },
-    { label: '🇺🇸 US Pacific (LAX / SEA / SFO)',     iana: 'America/Los_Angeles' },
-    { label: '🇬🇧 UK (LON / LIS)',                   iana: 'Europe/London' },
-    { label: '🇪🇺 Central Europe (PAR / BER / MAD)', iana: 'Europe/Paris' },
-    { label: '🇭🇰 Hong Kong / China (HK / SH / TPE)', iana: 'Asia/Hong_Kong' },
-    { label: '🇯🇵 Japan (TYO / SEL)',                iana: 'Asia/Tokyo' },
-    { label: '🇮🇳 India (DEL / BOM / CCU)',          iana: 'Asia/Kolkata' },
-    { label: '🇦🇺 Australia Eastern (SYD / MEL)',    iana: 'Australia/Sydney' },
+    { label: 'US Eastern — NYC / TOR / MIA',         iana: 'America/New_York' },
+    { label: 'US Central — CHI / DAL / MEX',         iana: 'America/Chicago' },
+    { label: 'US Mountain — DEN / PHX',              iana: 'America/Denver' },
+    { label: 'US Pacific — LAX / SEA / SFO',         iana: 'America/Los_Angeles' },
+    { label: 'United Kingdom — LON / LIS',           iana: 'Europe/London' },
+    { label: 'Central Europe — PAR / BER / MAD',     iana: 'Europe/Paris' },
+    { label: 'Hong Kong / China — HK / SH / TPE',    iana: 'Asia/Hong_Kong' },
+    { label: 'Japan — TYO / SEL',                    iana: 'Asia/Tokyo' },
+    { label: 'India — DEL / BOM / CCU',              iana: 'Asia/Kolkata' },
+    { label: 'Australia Eastern — SYD / MEL',        iana: 'Australia/Sydney' },
   ];
 
   function showNoTzPicker(parsed) {
-    let html = `<div class="tz-ext-label">⏰ No timezone detected — where is this from?</div>`;
+    let html = `<div class="tz-ext-label">No zone detected &mdash; select origin</div>`;
     FALLBACK_TZ_OPTIONS.forEach((opt, i) => {
       html += `<button class="tz-ext-amb-btn" data-idx="${i}">${opt.label}</button>`;
     });
-    html += `<button class="tz-ext-amb-btn tz-ext-local-opt" data-idx="local">✓ It's already my time</button>`;
+    html += `<button class="tz-ext-amb-btn tz-ext-local-opt" data-idx="local">It's already my time</button>`;
     showTooltipAtSelection(html);
     tooltip.style.pointerEvents = 'auto';
     tooltip.querySelectorAll('.tz-ext-amb-btn').forEach(btn => {
