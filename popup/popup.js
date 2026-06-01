@@ -23,6 +23,8 @@ const swapBtn = document.getElementById('swapBtn');
 const resultEl = document.getElementById('result');
 const resultTime = document.getElementById('resultTime');
 const resultNote = document.getElementById('resultNote');
+const resultMeta = document.getElementById('resultMeta');
+const footerStamp = document.getElementById('footerStamp');
 
 // Populate selects
 ZONES.forEach(z => {
@@ -39,6 +41,18 @@ chrome.storage.sync.get(['sourceZone', 'targetZone'], (res) => {
 // Save zone changes
 fromZone.addEventListener('change', () => chrome.storage.sync.set({ sourceZone: fromZone.value }));
 toZone.addEventListener('change', () => chrome.storage.sync.set({ targetZone: toZone.value }));
+
+// Footer stamp: current local time as a flight-number-ish glyph
+if (footerStamp) {
+  const stamp = () => {
+    const n = new Date();
+    const hh = pad(n.getHours());
+    const mm = pad(n.getMinutes());
+    footerStamp.textContent = `LOCAL ${hh}${mm}`;
+  };
+  stamp();
+  setInterval(stamp, 30000);
+}
 
 // Swap
 swapBtn.addEventListener('click', () => {
@@ -58,8 +72,9 @@ function doConvert() {
 
   const parsed = parseTime(raw);
   if (!parsed) {
-    resultTime.textContent = '❌ Could not parse';
-    resultNote.textContent = 'Try formats like "10:30 AM" or "14:00"';
+    resultTime.textContent = '—';
+    resultMeta.textContent = 'parse error';
+    resultNote.textContent = 'Try "10:30 PM" or "14:00"';
     resultEl.hidden = false;
     return;
   }
@@ -71,26 +86,48 @@ function doConvert() {
 
   // Convert wall-time-in-source-TZ to a real UTC instant (browser-TZ independent)
   const utcMs = wallTimeInZoneToUTC(y, mo, d, parsed.hour, parsed.minute, fromZone.value);
+  const targetDate = new Date(utcMs);
 
-  const fmt = new Intl.DateTimeFormat('en-US', {
+  // Split time formatting so the big italic numeral can stand alone
+  const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: toZone.value,
-    hour: 'numeric', minute: '2-digit',
-    hour12: true, weekday: 'short',
-    month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  }).formatToParts(targetDate).reduce((a, p) => (a[p.type] = p.value, a), {});
+  const hhmm = `${parts.hour}:${parts.minute}`;
+  const ampm = (parts.dayPeriod || '').toUpperCase();
+
+  // Meta line: WEEKDAY · DAY MON · TZ
+  const metaFmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: toZone.value,
+    weekday: 'short', month: 'short', day: 'numeric',
     timeZoneName: 'short',
   });
+  const metaParts = metaFmt.formatToParts(targetDate).reduce((a, p) => {
+    (a[p.type] = a[p.type] || []).push(p.value);
+    return a;
+  }, {});
+  const metaLine = [
+    (metaParts.weekday || []).join('').toUpperCase(),
+    `${(metaParts.day || []).join('')} ${(metaParts.month || []).join('').toUpperCase()}`,
+    (metaParts.timeZoneName || []).join(''),
+  ].filter(Boolean).join(' · ');
 
-  // Day diff (compare calendar dates in each zone)
+  // Day diff
   const srcDay = refStr;
-  const tgtDay = new Date(utcMs).toLocaleDateString('en-CA', { timeZone: toZone.value });
-  let dayNote = '';
-  if (tgtDay > srcDay) dayNote = '📅 Next day';
-  else if (tgtDay < srcDay) dayNote = '📅 Previous day';
-  else dayNote = '📅 Same day';
+  const tgtDay = targetDate.toLocaleDateString('en-CA', { timeZone: toZone.value });
+  let dayTag = 'same day';
+  if (tgtDay > srcDay) dayTag = '+1 day';
+  else if (tgtDay < srcDay) dayTag = '−1 day';
 
-  resultTime.textContent = fmt.format(new Date(utcMs));
-  resultNote.textContent = dayNote;
+  resultTime.innerHTML = `${hhmm}<span class="ampm">${ampm}</span>`;
+  resultMeta.textContent = metaLine;
+  resultNote.innerHTML = `<span class="day-tag">${dayTag}</span> &middot; from ${shortZone(fromZone.value)} ${pad(parsed.hour)}:${pad(parsed.minute)}`;
   resultEl.hidden = false;
+}
+
+function shortZone(tz) {
+  // City portion as a compact code, e.g. "Asia/Hong_Kong" → "HONG_KONG"
+  return (tz.split('/').pop() || tz).replace(/_/g, ' ').toUpperCase();
 }
 
 function parseTime(text) {
