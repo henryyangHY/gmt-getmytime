@@ -20,7 +20,7 @@
   max-width: 380px;
   background: var(--tz-paper);
   color: var(--tz-ink);
-  font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace !important;
   font-size: 12px;
   line-height: 1.45;
   letter-spacing: 0;
@@ -30,8 +30,8 @@
   border-top: 3px solid var(--tz-red);
   border-radius: 0;
   box-shadow:
-    0 22px 50px -16px rgba(0, 0, 0, .55),
-    0 6px 14px -6px rgba(0, 0, 0, .4);
+    0 4px 16px rgba(0, 0, 0, .18),
+    0 1px 3px rgba(0, 0, 0, .12);
   pointer-events: auto;
   opacity: 0;
   transform: translateY(6px);
@@ -60,7 +60,7 @@
 /* ─── Section tag (red top-of-tooltip caption) ─── */
 .tz-ext-tooltip .tz-ext-tag {
   display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: .3em;
@@ -73,7 +73,7 @@
 
 /* ─── Source line ─── */
 .tz-ext-tooltip .tz-ext-src {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 13px;
   color: var(--tz-ink-2);
   margin-bottom: 10px;
@@ -104,7 +104,7 @@
   padding-bottom: 14px;
 }
 .tz-ext-tooltip .tz-ext-result-time {
-  font-family: 'Noto Serif JP', 'Noto Serif', serif;
+  font-family: 'Noto Serif JP', 'Noto Serif', serif !important;
   font-weight: 700;
   font-size: 42px;
   line-height: .95;
@@ -116,7 +116,7 @@
   line-height: 1.1;
 }
 .tz-ext-tooltip .tz-ext-ampm {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-weight: 600;
   font-size: 13px;
   color: var(--tz-red);
@@ -132,7 +132,7 @@
   background: var(--tz-red);
   color: var(--tz-paper);
   padding: 8px 10px 6px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 10px;
   font-weight: 700;
   line-height: 1.1;
@@ -146,7 +146,7 @@
 }
 .tz-ext-tooltip .tz-ext-stamp .tz-ext-stamp-jp {
   display: block;
-  font-family: 'Noto Serif JP', 'Noto Serif', serif;
+  font-family: 'Noto Serif JP', 'Noto Serif', serif !important;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: .3em;
@@ -181,7 +181,7 @@
   margin-bottom: 4px;
 }
 .tz-ext-tooltip .tz-ext-m-val {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 13px;
   font-weight: 600;
   color: var(--tz-ink);
@@ -201,7 +201,7 @@
   color: var(--tz-paper);
   border: 0;
   border-radius: 0;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .25em;
@@ -218,7 +218,7 @@
 
 /* ─── Picker question line ─── */
 .tz-ext-tooltip .tz-ext-picker-q {
-  font-family: 'Noto Serif JP', 'Noto Serif', serif;
+  font-family: 'Noto Serif JP', 'Noto Serif', serif !important;
   font-weight: 700;
   font-size: 17px;
   color: var(--tz-ink);
@@ -246,7 +246,7 @@
   border-radius: 0;
   background: transparent;
   color: var(--tz-ink);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace !important;
   font-size: 12px;
   text-align: left;
   cursor: pointer;
@@ -293,7 +293,7 @@
 
 /* ─── Error state ─── */
 .tz-ext-tooltip .tz-ext-err-mark {
-  font-family: 'Noto Serif JP', 'Noto Serif', serif;
+  font-family: 'Noto Serif JP', 'Noto Serif', serif !important;
   font-weight: 900;
   font-size: 28px;
   color: var(--tz-red);
