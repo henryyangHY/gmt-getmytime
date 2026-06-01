@@ -384,7 +384,22 @@
   }
 
   function showTooltipAtSelection(html) {
+  function ensureFontsLoaded() {
+    if (document.getElementById('tz-ext-fonts-link')) return;
+    const pre1 = document.createElement('link');
+    pre1.rel = 'preconnect'; pre1.href = 'https://fonts.googleapis.com';
+    const pre2 = document.createElement('link');
+    pre2.rel = 'preconnect'; pre2.href = 'https://fonts.gstatic.com'; pre2.crossOrigin = 'anonymous';
+    const link = document.createElement('link');
+    link.id = 'tz-ext-fonts-link';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;700;900&display=swap';
+    const head = document.head || document.documentElement;
+    head.appendChild(pre1); head.appendChild(pre2); head.appendChild(link);
+  }
+
     removeTooltip();
+    ensureFontsLoaded();
     tooltip = document.createElement('div');
     tooltip.className = 'tz-ext-tooltip';
     tooltip.innerHTML = html;
