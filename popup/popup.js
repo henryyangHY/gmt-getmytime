@@ -64,14 +64,13 @@ function doConvert() {
     return;
   }
 
-  // Build date in source TZ
+  // Reference date = today in source TZ (so "11:30am" maps to today over there)
   const now = new Date();
-  const refStr = now.toLocaleDateString('en-CA', { timeZone: fromZone.value });
-  const sourceDate = new Date(`${refStr}T${pad(parsed.hour)}:${pad(parsed.minute)}:00`);
+  const refStr = now.toLocaleDateString('en-CA', { timeZone: fromZone.value }); // YYYY-MM-DD
+  const [y, mo, d] = refStr.split('-').map(Number);
 
-  // Source → UTC → Target
-  const srcOffset = getOffset(sourceDate, fromZone.value);
-  const utcMs = sourceDate.getTime() + srcOffset * 60000;
+  // Convert wall-time-in-source-TZ to a real UTC instant (browser-TZ independent)
+  const utcMs = wallTimeInZoneToUTC(y, mo, d, parsed.hour, parsed.minute, fromZone.value);
 
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: toZone.value,
@@ -81,8 +80,8 @@ function doConvert() {
     timeZoneName: 'short',
   });
 
-  // Day diff
-  const srcDay = now.toLocaleDateString('en-CA', { timeZone: fromZone.value });
+  // Day diff (compare calendar dates in each zone)
+  const srcDay = refStr;
   const tgtDay = new Date(utcMs).toLocaleDateString('en-CA', { timeZone: toZone.value });
   let dayNote = '';
   if (tgtDay > srcDay) dayNote = '📅 Next day';
@@ -111,10 +110,22 @@ function parseTime(text) {
   return { hour, minute };
 }
 
-function getOffset(date, tz) {
-  const utc = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-  const loc = new Date(date.toLocaleString('en-US', { timeZone: tz }));
-  return (utc - loc) / 60000;
+function getTZOffsetMs(utcMs, tz) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).formatToParts(utcMs).reduce((a, p) => (a[p.type] = p.value, a), {});
+  const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+  return asUTC - utcMs;
+}
+
+function wallTimeInZoneToUTC(year, month, day, hour, minute, tz) {
+  const guess = Date.UTC(year, month - 1, day, hour, minute);
+  const offset = getTZOffsetMs(guess, tz);
+  // Second pass handles DST transitions where offset at guess differs from offset at actual instant
+  const refined = getTZOffsetMs(guess - offset, tz);
+  return guess - refined;
 }
 
 function pad(n) { return String(n).padStart(2, '0'); }
