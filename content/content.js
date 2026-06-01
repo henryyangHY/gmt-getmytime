@@ -71,38 +71,38 @@
 
   const TZ_AMBIGUOUS = {
     'CST': [
-      { label: 'US Central (GMT-6)',     iana: 'America/Chicago' },
-      { label: 'China (GMT+8)',          iana: 'Asia/Shanghai' },
-      { label: 'Australia (GMT+9:30)',   iana: 'Australia/Adelaide' },
+      { name: 'US Central',      offset: 'GMT-6',    iana: 'America/Chicago' },
+      { name: 'China',           offset: 'GMT+8',    iana: 'Asia/Shanghai' },
+      { name: 'Australia',       offset: 'GMT+9:30', iana: 'Australia/Adelaide' },
     ],
     'EST': [
-      { label: 'US Eastern (GMT-5)',     iana: 'America/New_York' },
-      { label: 'Australia (GMT+10)',     iana: 'Australia/Sydney' },
+      { name: 'US Eastern',      offset: 'GMT-5',    iana: 'America/New_York' },
+      { name: 'Australia',       offset: 'GMT+10',   iana: 'Australia/Sydney' },
     ],
     'IST': [
-      { label: 'India (GMT+5:30)',       iana: 'Asia/Kolkata' },
-      { label: 'Israel (GMT+2)',         iana: 'Asia/Jerusalem' },
-      { label: 'Ireland (GMT+1)',        iana: 'Europe/Dublin' },
+      { name: 'India',           offset: 'GMT+5:30', iana: 'Asia/Kolkata' },
+      { name: 'Israel',          offset: 'GMT+2',    iana: 'Asia/Jerusalem' },
+      { name: 'Ireland',         offset: 'GMT+1',    iana: 'Europe/Dublin' },
     ],
     'BST': [
-      { label: 'British Summer (GMT+1)', iana: 'Europe/London' },
-      { label: 'Bangladesh (GMT+6)',     iana: 'Asia/Dhaka' },
+      { name: 'British Summer',  offset: 'GMT+1',    iana: 'Europe/London' },
+      { name: 'Bangladesh',      offset: 'GMT+6',    iana: 'Asia/Dhaka' },
     ],
     'AST': [
-      { label: 'Atlantic (GMT-4)',       iana: 'America/Halifax' },
-      { label: 'Arabian (GMT+3)',        iana: 'Asia/Riyadh' },
+      { name: 'Atlantic',        offset: 'GMT-4',    iana: 'America/Halifax' },
+      { name: 'Arabian',         offset: 'GMT+3',    iana: 'Asia/Riyadh' },
     ],
     'PST': [
-      { label: 'US Pacific (GMT-8)',     iana: 'America/Los_Angeles' },
-      { label: 'Philippines (GMT+8)',    iana: 'Asia/Manila' },
+      { name: 'US Pacific',      offset: 'GMT-8',    iana: 'America/Los_Angeles' },
+      { name: 'Philippines',     offset: 'GMT+8',    iana: 'Asia/Manila' },
     ],
     'MST': [
-      { label: 'US Mountain (GMT-7)',    iana: 'America/Denver' },
-      { label: 'Malaysia (GMT+8)',       iana: 'Asia/Kuala_Lumpur' },
+      { name: 'US Mountain',     offset: 'GMT-7',    iana: 'America/Denver' },
+      { name: 'Malaysia',        offset: 'GMT+8',    iana: 'Asia/Kuala_Lumpur' },
     ],
     'SST': [
-      { label: 'Singapore (GMT+8)',      iana: 'Asia/Singapore' },
-      { label: 'Samoa (GMT-11)',         iana: 'Pacific/Pago_Pago' },
+      { name: 'Singapore',       offset: 'GMT+8',    iana: 'Asia/Singapore' },
+      { name: 'Samoa',           offset: 'GMT-11',   iana: 'Pacific/Pago_Pago' },
     ],
   };
 
@@ -432,57 +432,106 @@
     tooltip.style.transform = 'translateY(0)';
   }
 
+  // ── Showa-style result helpers ──
+  function buildResultParts(utcMs) {
+    const d = new Date(utcMs);
+    const tparts = new Intl.DateTimeFormat('en-US', {
+      timeZone: localZone, hour: 'numeric', minute: '2-digit', hour12: true,
+    }).formatToParts(d).reduce((a, p) => (a[p.type] = p.value, a), {});
+    const meta = new Intl.DateTimeFormat('en-US', {
+      timeZone: localZone, weekday: 'short', month: 'short', day: 'numeric', timeZoneName: 'short',
+    }).formatToParts(d).reduce((a, p) => { (a[p.type] = a[p.type] || []).push(p.value); return a; }, {});
+    return {
+      timeHTML: `${tparts.hour}:${tparts.minute}<span class="tz-ext-ampm">${(tparts.dayPeriod || '').toUpperCase()}</span>`,
+      day: (meta.weekday || ['—']).join('').toUpperCase(),
+      date: `${(meta.day || []).join('')} ${(meta.month || []).join('').toUpperCase()}`,
+      zone: (meta.timeZoneName || ['—']).join(''),
+      targetDate: d,
+    };
+  }
+
+  function stampHTML(srcDayStr, tgtDayStr) {
+    let en = 'Same day', jp = '同日', cls = 'tz-ext-stamp same';
+    if (tgtDayStr > srcDayStr) { en = '+1 day';  jp = '翌日'; cls = 'tz-ext-stamp'; }
+    else if (tgtDayStr < srcDayStr) { en = '−1 day';  jp = '前日'; cls = 'tz-ext-stamp'; }
+    return `<div class="${cls}">${en}<span class="tz-ext-stamp-jp">${jp}</span></div>`;
+  }
+
+  function metaStubHTML(day, date, zone) {
+    return `<div class="tz-ext-meta">` +
+      `<div><div class="tz-ext-m-label">Day</div><div class="tz-ext-m-val">${day}</div></div>` +
+      `<div><div class="tz-ext-m-label">Date</div><div class="tz-ext-m-val">${date}</div></div>` +
+      `<div><div class="tz-ext-m-label">Zone</div><div class="tz-ext-m-val">${zone}</div></div>` +
+    `</div>`;
+  }
+
   // ── Show result ──
   function showResult(parsed, sourceZone) {
+    const isLocal = !!parsed.isLocalTime;
+    const isRange = parsed.type === 'range';
     const refD = parsed.date ? new Date(parsed.date.year, parsed.date.month, parsed.date.day) : undefined;
     const srcLabel = formatGmtOffset(sourceZone, refD);
-    const localLabel = formatGmtOffset(localZone, refD);
-    let rows = '';
 
-    if (parsed.isLocalTime) {
-      const timeStr = parsed.type === 'range'
-        ? `${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)} – ${fmtTime12(parsed.times[1].hour, parsed.times[1].minute)}`
-        : fmtTime12(parsed.times[0].hour, parsed.times[0].minute);
-      rows =
-        `<div class="tz-ext-local-badge">Already your time</div>` +
-        `<div class="tz-ext-row"><span class="tz-ext-result">${timeStr}</span></div>` +
-        `<div class="tz-ext-row"><span class="tz-ext-label">${localLabel}</span></div>`;
-    } else if (parsed.type === 'range') {
-      const r1 = convertTime(parsed.times[0].hour, parsed.times[0].minute, sourceZone, parsed.date);
-      const r2 = convertTime(parsed.times[1].hour, parsed.times[1].minute, sourceZone, parsed.date);
-      rows =
-        `<div class="tz-ext-label">${srcLabel}</div>` +
-        `<div class="tz-ext-row"><span class="tz-ext-source">${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)} – ${fmtTime12(parsed.times[1].hour, parsed.times[1].minute)}</span></div>` +
-        `<div class="tz-ext-divider"></div>` +
-        `<div class="tz-ext-label">${localLabel}</div>` +
-        `<div class="tz-ext-row"><span class="tz-ext-result">${r1.formatted}</span><span class="tz-ext-arrow"> – </span><span class="tz-ext-result">${r2.formatted}</span></div>`;
+    const r1 = convertTime(parsed.times[0].hour, parsed.times[0].minute, sourceZone, parsed.date);
+    const r2 = isRange ? convertTime(parsed.times[1].hour, parsed.times[1].minute, sourceZone, parsed.date) : null;
+    const b1 = buildResultParts(r1.utcMs);
+    const b2 = r2 ? buildResultParts(r2.utcMs) : null;
+
+    const srcTimeStr = isRange
+      ? `${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)} – ${fmtTime12(parsed.times[1].hour, parsed.times[1].minute)}`
+      : fmtTime12(parsed.times[0].hour, parsed.times[0].minute);
+    const srcLine = isLocal
+      ? `<strong>${srcTimeStr}</strong> &middot; no zone specified`
+      : `<strong>${srcTimeStr} ${srcLabel}</strong> &rarr; your time`;
+
+    const srcDayStr = parsed.date
+      ? `${parsed.date.year}-${String(parsed.date.month + 1).padStart(2,'0')}-${String(parsed.date.day).padStart(2,'0')}`
+      : new Date().toLocaleDateString('en-CA', { timeZone: sourceZone });
+    const tgtDayStr = b1.targetDate.toLocaleDateString('en-CA', { timeZone: localZone });
+
+    let tag, stamp;
+    if (isLocal) {
+      tag = 'Treated as local';
+      stamp = `<div class="tz-ext-stamp same">Same day<span class="tz-ext-stamp-jp">同日</span></div>`;
+    } else if (r1.sameOffset) {
+      tag = 'No conversion needed';
+      stamp = `<div class="tz-ext-stamp same">Same day<span class="tz-ext-stamp-jp">同日</span></div>`;
     } else {
-      const r = convertTime(parsed.times[0].hour, parsed.times[0].minute, sourceZone, parsed.date);
-      if (r.sameOffset) {
-        rows =
-          `<div class="tz-ext-local-badge">Same time zone</div>` +
-          `<div class="tz-ext-row"><span class="tz-ext-result">${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)}</span></div>` +
-          `<div class="tz-ext-row"><span class="tz-ext-label">${localLabel}</span></div>`;
-      } else {
-        rows =
-          `<div class="tz-ext-row"><span class="tz-ext-source">${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)} ${srcLabel}</span></div>` +
-          `<div class="tz-ext-divider"></div>` +
-          `<div class="tz-ext-row"><span class="tz-ext-result">${r.formatted}</span><span class="tz-ext-label" style="margin-left:8px">${localLabel}</span></div>`;
-      }
+      tag = isRange ? 'Range converted' : 'Time converted';
+      stamp = stampHTML(srcDayStr, tgtDayStr);
     }
 
-    // Calendar button
+    const timeBlock = b2
+      ? `<div class="tz-ext-result-time range">${b1.timeHTML}<br>&ndash; ${b2.timeHTML}</div>`
+      : `<div class="tz-ext-result-time">${b1.timeHTML}</div>`;
+
+    let html =
+      `<span class="tz-ext-tag">${tag}</span>` +
+      `<div class="tz-ext-src">${srcLine}</div>` +
+      `<div class="tz-ext-result">` +
+        `<div class="tz-ext-result-top">${timeBlock}${stamp}</div>` +
+        metaStubHTML(b1.day, b1.date, b1.zone) +
+      `</div>`;
+
     const calUrl = buildCalendarUrl(parsed, sourceZone);
-    rows += `<div class="tz-ext-divider"></div><a class="tz-ext-cal-btn" href="${calUrl}" target="_blank" rel="noopener">Add to Google Calendar &rarr;</a>`;
-    showTooltipAtSelection(rows);
+    html += `<a class="tz-ext-cal-btn" href="${calUrl}" target="_blank" rel="noopener">Add to Google Calendar &rarr;</a>`;
+    showTooltipAtSelection(html);
   }
 
   // ── Ambiguity picker ──
   function showAmbiguityPicker(parsed, options, abbr) {
-    let html = `<div class="tz-ext-label">Ambiguous &mdash; "${abbr}" matches multiple zones</div>`;
+    const countWord = ({ 2: 'two', 3: 'three', 4: 'four', 5: 'five' })[options.length] || `${options.length}`;
+    let html =
+      `<span class="tz-ext-tag">Pick a zone</span>` +
+      `<div class="tz-ext-picker-q"><span class="tz-ext-q-red">"${abbr}"</span> matches ${countWord} zones</div>` +
+      `<div class="tz-ext-pick-list">`;
     options.forEach((opt, i) => {
-      html += `<button class="tz-ext-amb-btn" data-idx="${i}">${opt.label}</button>`;
+      html += `<button class="tz-ext-amb-btn" data-idx="${i}">` +
+                `<span class="tz-ext-name">${opt.name}</span>` +
+                `<span class="tz-ext-meta-r">${opt.offset}</span>` +
+              `</button>`;
     });
+    html += `</div>`;
     showTooltipAtSelection(html);
     tooltip.style.pointerEvents = 'auto';
     tooltip.querySelectorAll('.tz-ext-amb-btn').forEach(btn => {
@@ -496,24 +545,37 @@
 
   // ── No-TZ Fallback picker ──
   const FALLBACK_TZ_OPTIONS = [
-    { label: 'US Eastern — NYC / TOR / MIA',         iana: 'America/New_York' },
-    { label: 'US Central — CHI / DAL / MEX',         iana: 'America/Chicago' },
-    { label: 'US Mountain — DEN / PHX',              iana: 'America/Denver' },
-    { label: 'US Pacific — LAX / SEA / SFO',         iana: 'America/Los_Angeles' },
-    { label: 'United Kingdom — LON / LIS',           iana: 'Europe/London' },
-    { label: 'Central Europe — PAR / BER / MAD',     iana: 'Europe/Paris' },
-    { label: 'Hong Kong / China — HK / SH / TPE',    iana: 'Asia/Hong_Kong' },
-    { label: 'Japan — TYO / SEL',                    iana: 'Asia/Tokyo' },
-    { label: 'India — DEL / BOM / CCU',              iana: 'Asia/Kolkata' },
-    { label: 'Australia Eastern — SYD / MEL',        iana: 'Australia/Sydney' },
+    { name: 'US Eastern',         meta: 'NYC / TOR / MIA',     iana: 'America/New_York' },
+    { name: 'US Central',         meta: 'CHI / DAL / MEX',     iana: 'America/Chicago' },
+    { name: 'US Mountain',        meta: 'DEN / PHX',           iana: 'America/Denver' },
+    { name: 'US Pacific',         meta: 'LAX / SEA / SFO',     iana: 'America/Los_Angeles' },
+    { name: 'United Kingdom',     meta: 'LON / LIS',           iana: 'Europe/London' },
+    { name: 'Central Europe',     meta: 'PAR / BER / MAD',     iana: 'Europe/Paris' },
+    { name: 'Hong Kong / China',  meta: 'HK / SH / TPE',       iana: 'Asia/Hong_Kong' },
+    { name: 'Japan',              meta: 'TYO / SEL',           iana: 'Asia/Tokyo' },
+    { name: 'India',              meta: 'DEL / BOM / CCU',     iana: 'Asia/Kolkata' },
+    { name: 'Australia Eastern',  meta: 'SYD / MEL',           iana: 'Australia/Sydney' },
   ];
 
   function showNoTzPicker(parsed) {
-    let html = `<div class="tz-ext-label">No zone detected &mdash; select origin</div>`;
+    const srcTime = parsed.type === 'range'
+      ? `${fmtTime12(parsed.times[0].hour, parsed.times[0].minute)} – ${fmtTime12(parsed.times[1].hour, parsed.times[1].minute)}`
+      : fmtTime12(parsed.times[0].hour, parsed.times[0].minute);
+    let html =
+      `<span class="tz-ext-tag">Where is this from?</span>` +
+      `<div class="tz-ext-picker-q">No zone detected for <span class="tz-ext-q-red">${srcTime}</span></div>` +
+      `<div class="tz-ext-pick-list">`;
     FALLBACK_TZ_OPTIONS.forEach((opt, i) => {
-      html += `<button class="tz-ext-amb-btn" data-idx="${i}">${opt.label}</button>`;
+      html += `<button class="tz-ext-amb-btn" data-idx="${i}">` +
+                `<span class="tz-ext-name">${opt.name}</span>` +
+                `<span class="tz-ext-meta-r">${opt.meta}</span>` +
+              `</button>`;
     });
-    html += `<button class="tz-ext-amb-btn tz-ext-local-opt" data-idx="local">It's already my time</button>`;
+    html += `</div>` +
+            `<button class="tz-ext-amb-btn tz-ext-local-opt" data-idx="local">` +
+              `<span class="tz-ext-name">It's already my time</span>` +
+              `<span class="tz-ext-meta-r">&crarr;</span>` +
+            `</button>`;
     showTooltipAtSelection(html);
     tooltip.style.pointerEvents = 'auto';
     tooltip.querySelectorAll('.tz-ext-amb-btn').forEach(btn => {
@@ -534,7 +596,11 @@
   function handleConvert(text) {
     const parsed = parseTimeString(text);
     if (!parsed) {
-      showTooltipAtSelection(`<div class="tz-ext-label">No time detected</div>`);
+      showTooltipAtSelection(
+        `<span class="tz-ext-tag">Couldn't read</span>` +
+        `<div class="tz-ext-err-mark">無</div>` +
+        `<div class="tz-ext-err-sub">No time found in selection</div>`
+      );
       return;
     }
     if (parsed.isLocalTime) {

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GMT · Design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400;500;600&family=Major+Mono+Display&family=Noto+Serif+JP:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=VT323&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #2a2724;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #eee;
+    padding: 32px;
+  }
+  h1 { font-weight: 300; font-size: 22px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 4px; }
+  h1 + p { font-size: 13px; color: #999; margin-bottom: 36px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 380px);
+    gap: 28px 28px;
+    align-items: start;
+  }
+  .mock-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .mock-label {
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #b8b3aa;
+    font-weight: 500;
+  }
+  .mock-label .key { color: #fff; font-weight: 700; margin-right: 8px; }
+  .mock-label .vibe { color: #777; text-transform: none; letter-spacing: 0; font-size: 11px; font-style: italic; margin-left: 6px; }
+
+  .popup {
+    width: 360px;
+    min-height: 460px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ──────────── A. RISOGRAPH ──────────── */
+  .riso {
+    background: #f4ecd8;
+    color: #0a0a08;
+    font-family: 'PT Serif', serif;
+    padding: 22px 22px 20px;
+    position: relative;
+  }
+  .riso::before {
+    /* halftone dots — riso texture */
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,59,107,.18) 1px, transparent 1.2px);
+    background-size: 5px 5px;
+    pointer-events: none;
+  }
+  .riso h2 {
+    font-family: 'PT Serif', serif;
+    font-weight: 700; font-style: italic;
+    font-size: 32px;
+    color: #0a4a4a;
+    line-height: .95;
+    letter-spacing: -.02em;
+    position: relative;
+  }
+  .riso h2 .pink {
+    color: #ff3b6b;
+    display: inline-block;
+    transform: translate(2px, -1px);
+  }
+  .riso .tagline { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #0a4a4a; margin-top: 6px; font-family: 'DM Mono', monospace; }
+  .riso .field { margin-top: 18px; }
+  .riso .field-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #0a4a4a; }
+  .riso .field-val {
+    font-family: 'PT Serif', serif;
+    font-size: 18px;
+    border-bottom: 2px solid #0a0a08;
+    padding: 4px 0 2px;
+    margin-top: 4px;
+    display: flex; justify-content: space-between;
+  }
+  .riso .field-val span:last-child { color: #0a4a4a; font-style: italic; }
+  .riso .cta {
+    margin-top: 22px;
+    background: #ff3b6b;
+    color: #f4ecd8;
+    padding: 12px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    position: relative;
+    /* riso offset shadow */
+    box-shadow: 3px 3px 0 #0a4a4a;
+  }
+  .riso .result {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1.5px dashed #0a4a4a;
+  }
+  .riso .result-time {
+    font-family: 'PT Serif', serif;
+    font-style: italic;
+    font-size: 44px;
+    color: #ff3b6b;
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .riso .result-meta { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #0a4a4a; margin-top: 6px; }
+
+  /* ──────────── B. BLUEPRINT ──────────── */
+  .blueprint {
+    background: #0a2b4a;
+    background-image:
+      linear-gradient(rgba(245,239,228,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,239,228,.06) 1px, transparent 1px);
+    background-size: 16px 16px;
+    color: #f5efe4;
+    font-family: 'Space Mono', monospace;
+    padding: 22px;
+    position: relative;
+  }
+  .blueprint .header {
+    border-bottom: 1px solid rgba(245,239,228,.3);
+    padding-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .blueprint .header h2 {
+    font-family: 'Major Mono Display', monospace;
+    font-size: 22px;
+    letter-spacing: .04em;
+  }
+  .blueprint .header .rev { font-size: 9px; letter-spacing: .2em; color: rgba(245,239,228,.5); }
+  .blueprint .row {
+    display: grid; grid-template-columns: 28px 1fr auto;
+    gap: 10px; align-items: baseline;
+    padding: 10px 0; border-bottom: 1px solid rgba(245,239,228,.12);
+  }
+  .blueprint .num { font-family: 'Major Mono Display', monospace; font-size: 10px; color: rgba(245,239,228,.5); }
+  .blueprint .key { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(245,239,228,.75); }
+  .blueprint .val { font-family: 'Major Mono Display', monospace; font-size: 14px; color: #e87b3a; }
+  .blueprint .callout {
+    margin-top: 18px;
+    padding: 14px 12px;
+    position: relative;
+  }
+  /* dimensional callout: tick marks each end */
+  .blueprint .callout::before, .blueprint .callout::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 1px; background: #e87b3a;
+  }
+  .blueprint .callout::before { left: 0; }
+  .blueprint .callout::after { right: 0; }
+  .blueprint .callout-line {
+    position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e87b3a;
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  .blueprint .callout-val {
+    position: relative; z-index: 1;
+    display: inline-block;
+    background: #0a2b4a;
+    padding: 0 12px;
+    font-family: 'Major Mono Display', monospace;
+    font-size: 32px;
+    color: #f5efe4;
+    letter-spacing: .02em;
+  }
+  .blueprint .callout-meta { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(245,239,228,.6); margin-top: 8px; text-align: center; }
+  .blueprint .cta {
+    margin-top: 16px;
+    border: 1px solid #e87b3a;
+    color: #e87b3a;
+    background: transparent;
+    text-align: center;
+    padding: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  /* ──────────── C. SHOWA ──────────── */
+  .showa {
+    background: #efe9dc;
+    color: #0a0a08;
+    font-family: 'Noto Serif JP', serif;
+    padding: 26px 24px;
+    position: relative;
+  }
+  .showa .head {
+    border-top: 2px solid #0a0a08;
+    border-bottom: 1px solid #0a0a08;
+    padding: 14px 0 12px;
+    margin-bottom: 18px;
+    text-align: center;
+    /* double rule, classic east asian print */
+  }
+  .showa .head::after {
+    content: '';
+    display: block;
+    border-top: 1px solid #0a0a08;
+    margin-top: 12px;
+    margin-bottom: -22px;
+  }
+  .showa h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: .12em;
+  }
+  .showa h2 .jp { font-size: 14px; letter-spacing: .3em; display: block; margin-top: 4px; color: #555; font-weight: 500; }
+  .showa .row {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: baseline;
+    gap: 10px; padding: 8px 0;
+    border-bottom: 1px dotted rgba(10,10,8,.3);
+  }
+  .showa .key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: #555;
+  }
+  .showa .leader { height: 0; border-bottom: 1px dotted rgba(10,10,8,.25); transform: translateY(-3px); }
+  .showa .val { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; }
+  .showa .stamp {
+    display: inline-block;
+    background: #d8332f;
+    color: #efe9dc;
+    padding: 4px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin: 18px 0 10px;
+    /* stamp slight tilt */
+    transform: rotate(-1.5deg);
+    box-shadow: 1px 1px 0 rgba(0,0,0,.1);
+  }
+  .showa .result-time {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 700;
+    font-size: 48px;
+    color: #0a0a08;
+    line-height: 1;
+    letter-spacing: -.01em;
+  }
+  .showa .result-time .ampm { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; color: #d8332f; vertical-align: 18px; margin-left: 8px; letter-spacing: .1em; }
+  .showa .result-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #555; margin-top: 6px; }
+  .showa .cta {
+    margin-top: 22px;
+    background: #0a0a08;
+    color: #efe9dc;
+    text-align: center;
+    padding: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+  }
+
+  /* ──────────── D. BRUTALIST ──────────── */
+  .brutal {
+    background: #a8a59e;
+    color: #000;
+    font-family: 'Archivo', sans-serif;
+    padding: 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+  }
+  .brutal .side {
+    background: #000;
+    color: #fcee21;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-orientation: mixed;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    letter-spacing: .4em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 12px 0;
+  }
+  .brutal .main { padding: 20px 22px 24px; }
+  .brutal h2 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 30px;
+    line-height: .9;
+    text-transform: uppercase;
+    letter-spacing: -.02em;
+  }
+  .brutal h2 .y { background: #fcee21; padding: 0 4px; }
+  .brutal .meta { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; margin-top: 8px; }
+  .brutal .rule { height: 4px; background: #000; margin: 16px 0; }
+  .brutal .row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .brutal .row b { font-family: 'Archivo Black', sans-serif; font-size: 14px; letter-spacing: -.01em; text-transform: none; }
+  .brutal .big {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 80px;
+    line-height: .85;
+    letter-spacing: -.04em;
+    margin: 18px 0 4px;
+  }
+  .brutal .big .yellow-block {
+    background: #fcee21;
+    padding: 0 6px;
+    display: inline-block;
+  }
+  .brutal .ampm { font-family: 'Archivo Black', sans-serif; font-size: 18px; letter-spacing: .04em; vertical-align: 38px; margin-left: 6px; }
+  .brutal .resnote { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 18px; }
+  .brutal .cta {
+    background: #000;
+    color: #fcee21;
+    padding: 14px;
+    text-align: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 12px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  /* ──────────── E. LAB INSTRUMENT ──────────── */
+  .lab {
+    background: #0a1208;
+    color: #f0e6c0;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 22px;
+    position: relative;
+    border: 2px solid #2a3025;
+  }
+  .lab::before {
+    /* etched metal panel hint at top edge */
+    content: '';
+    position: absolute; top: 8px; left: 8px; right: 8px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240,230,192,.18), transparent);
+  }
+  .lab .panel-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2a3025;
+    margin-bottom: 14px;
+  }
+  .lab h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: #f0e6c0;
+  }
+  .lab .led {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: #7fff5e;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(127,255,94,.7), inset 0 0 3px rgba(0,0,0,.4);
+    animation: blink 1.6s infinite;
+  }
+  @keyframes blink { 0%, 60% { opacity: 1; } 75%, 100% { opacity: .25; } }
+  .lab .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(240,230,192,.65); }
+  .lab .row .v { color: #ff6a1f; letter-spacing: .04em; }
+  .lab .readout {
+    margin-top: 16px;
+    background: #050a04;
+    border: 1px inset #1a2218;
+    padding: 14px 16px;
+    box-shadow: inset 0 0 24px rgba(127,255,94,.05);
+  }
+  .lab .readout-label { font-size: 9px; letter-spacing: .3em; text-transform: uppercase; color: rgba(240,230,192,.5); }
+  .lab .readout-time {
+    font-family: 'VT323', monospace;
+    font-size: 62px;
+    line-height: 1;
+    color: #7fff5e;
+    text-shadow: 0 0 8px rgba(127,255,94,.5);
+    letter-spacing: .04em;
+    margin: 2px 0;
+  }
+  .lab .readout-meta { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(240,230,192,.65); }
+  .lab .cta {
+    margin-top: 16px;
+    background: #1a2218;
+    border: 1px solid #ff6a1f;
+    color: #ff6a1f;
+    padding: 10px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+  }
+  .lab .switch-row { display: flex; gap: 6px; margin-top: 12px; }
+  .lab .switch {
+    flex: 1;
+    background: #1a2218;
+    border: 1px solid #2a3025;
+    color: rgba(240,230,192,.7);
+    padding: 6px;
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .lab .switch.on { color: #7fff5e; border-color: #7fff5e; }
+</style>
+</head>
+<body>
+
+<h1>GMT · Design Directions</h1>
+<p>Five distinct aesthetics, same content (HKT 11:30 PM → Chicago). Pick one or mix.</p>
+
+<div class="grid">
+
+  <!-- A: RISOGRAPH -->
+  <div class="mock-wrap">
+    <div class="mock-label"><span class="key">A</span>Risograph<span class="vibe">— studio print, fluorescent</span></div>
+    <div class="popup riso">
+      <h2>GMT<span class="pink">·</span>Convert</h2>
+      <div class="tagline">A schedule utility · est. 2026</div>
+
+      <div class="field">
+        <div class="field-label">Time</div>
+        <div class="field-val"><span>11:30 PM</span><span>HKT</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">To</div>
+        <div class="field-val"><span>America</span><span>Chicago</span></div>
+      </div>
+
+      <div class="cta">Convert →</div>
+
+      <div class="result">
+        <div class="result-time">10:30 PM</div>
+        <div class="result-meta">Sun · 31 May · CDT · −1 day</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: BLUEPRINT -->
+  <div class="mock-wrap">
+    <div class="mock-label"><span class="key">B</span>Blueprint<span class="vibe">— drafting table</span></div>
+    <div class="popup blueprint">
+      <div class="header">
+        <h2>gmt.cnv</h2>
+        <span class="rev">REV. 03 / SHEET 01</span>
+      </div>
+
+      <div class="row"><span class="num">01.</span><span class="key">Time</span><span class="val">23:30</span></div>
+      <div class="row"><span class="num">02.</span><span class="key">From</span><span class="val">HKT [+8]</span></div>
+      <div class="row"><span class="num">03.</span><span class="key">To</span><span class="val">CDT [−5]</span></div>
+
+      <div class="callout">
+        <span class="callout-line"></span>
+        <span class="callout-val">22:30</span>
+      </div>
+      <div class="callout-meta">SUN · 31 MAY · −1 DAY</div>
+
+      <div class="cta">[ Convert ]</div>
+    </div>
+  </div>
+
+  <!-- C: SHOWA -->
+  <div class="mock-wrap">
+    <div class="mock-label"><span class="key">C</span>Showa timetable<span class="vibe">— 昭和駅時刻表</span></div>
+    <div class="popup showa">
+      <div class="head">
+        <h2>GET MY TIME<span class="jp">時刻換算</span></h2>
+      </div>
+
+      <div class="row"><span class="key">Time</span><span class="leader"></span><span class="val">11:30 PM</span></div>
+      <div class="row"><span class="key">From</span><span class="leader"></span><span class="val">Hong Kong</span></div>
+      <div class="row"><span class="key">To</span><span class="leader"></span><span class="val">Chicago</span></div>
+
+      <div class="stamp">Arrival · 到着</div>
+      <div class="result-time">10:30<span class="ampm">PM</span></div>
+      <div class="result-meta">Sun · 31 May · CDT · prev day</div>
+
+      <div class="cta">Add to calendar</div>
+    </div>
+  </div>
+
+  <!-- D: BRUTALIST -->
+  <div class="mock-wrap">
+    <div class="mock-label"><span class="key">D</span>Brutalist poster<span class="vibe">— concrete + signal yellow</span></div>
+    <div class="popup brutal">
+      <div class="side">GMT · CONVERT · v3</div>
+      <div class="main">
+        <h2>TIME<br><span class="y">ZONE</span><br>CONVERT</h2>
+        <div class="meta">A SCHEDULE UTILITY / 2026</div>
+        <div class="rule"></div>
+
+        <div class="row"><span>From</span><b>HKT 23:30</b></div>
+        <div class="row"><span>To</span><b>Chicago</b></div>
+
+        <div class="big"><span class="yellow-block">10</span>:30<span class="ampm">PM</span></div>
+        <div class="resnote">Sun 31 May · CDT · −1 day</div>
+
+        <div class="cta">Convert ▸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E: LAB INSTRUMENT -->
+  <div class="mock-wrap">
+    <div class="mock-label"><span class="key">E</span>Lab instrument<span class="vibe">— oscilloscope panel</span></div>
+    <div class="popup lab">
+      <div class="panel-head">
+        <h2>GMT-3000</h2>
+        <span class="led" title="power"></span>
+      </div>
+
+      <div class="row"><span>Channel A · Input</span><span class="v">23:30 HKT</span></div>
+      <div class="row"><span>Channel B · Target</span><span class="v">CDT (UTC−5)</span></div>
+
+      <div class="readout">
+        <div class="readout-label">Computed local time</div>
+        <div class="readout-time">10:30 PM</div>
+        <div class="readout-meta">SUN · 31 MAY · −1 DAY · CDT</div>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch on">12 H</div>
+        <div class="switch">24 H</div>
+        <div class="switch">UTC</div>
+      </div>
+
+      <div class="cta">[ Transmit to calendar ]</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

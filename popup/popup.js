@@ -22,8 +22,10 @@ const convertBtn = document.getElementById('convertBtn');
 const swapBtn = document.getElementById('swapBtn');
 const resultEl = document.getElementById('result');
 const resultTime = document.getElementById('resultTime');
-const resultNote = document.getElementById('resultNote');
-const resultMeta = document.getElementById('resultMeta');
+const resultStamp = document.getElementById('resultStamp');
+const resultDay = document.getElementById('resultDay');
+const resultDate = document.getElementById('resultDate');
+const resultZone = document.getElementById('resultZone');
 const footerStamp = document.getElementById('footerStamp');
 
 // Populate selects
@@ -73,61 +75,51 @@ function doConvert() {
   const parsed = parseTime(raw);
   if (!parsed) {
     resultTime.textContent = '—';
-    resultMeta.textContent = 'parse error';
-    resultNote.textContent = 'Try "10:30 PM" or "14:00"';
+    resultStamp.hidden = true;
+    resultDay.textContent = '—';
+    resultDate.textContent = 'parse error';
+    resultZone.textContent = '—';
     resultEl.hidden = false;
     return;
   }
 
-  // Reference date = today in source TZ (so "11:30am" maps to today over there)
+  // Reference date = today in source TZ
   const now = new Date();
-  const refStr = now.toLocaleDateString('en-CA', { timeZone: fromZone.value }); // YYYY-MM-DD
+  const refStr = now.toLocaleDateString('en-CA', { timeZone: fromZone.value });
   const [y, mo, d] = refStr.split('-').map(Number);
-
-  // Convert wall-time-in-source-TZ to a real UTC instant (browser-TZ independent)
   const utcMs = wallTimeInZoneToUTC(y, mo, d, parsed.hour, parsed.minute, fromZone.value);
   const targetDate = new Date(utcMs);
 
-  // Split time formatting so the big italic numeral can stand alone
-  const parts = new Intl.DateTimeFormat('en-US', {
+  // hh:mm + AM/PM
+  const tparts = new Intl.DateTimeFormat('en-US', {
     timeZone: toZone.value,
     hour: 'numeric', minute: '2-digit', hour12: true,
   }).formatToParts(targetDate).reduce((a, p) => (a[p.type] = p.value, a), {});
-  const hhmm = `${parts.hour}:${parts.minute}`;
-  const ampm = (parts.dayPeriod || '').toUpperCase();
+  resultTime.innerHTML = `${tparts.hour}:${tparts.minute}<span class="ampm">${(tparts.dayPeriod || '').toUpperCase()}</span>`;
 
-  // Meta line: WEEKDAY · DAY MON · TZ
-  const metaFmt = new Intl.DateTimeFormat('en-US', {
+  // Meta parts
+  const meta = new Intl.DateTimeFormat('en-US', {
     timeZone: toZone.value,
-    weekday: 'short', month: 'short', day: 'numeric',
-    timeZoneName: 'short',
-  });
-  const metaParts = metaFmt.formatToParts(targetDate).reduce((a, p) => {
+    weekday: 'short', month: 'short', day: 'numeric', timeZoneName: 'short',
+  }).formatToParts(targetDate).reduce((a, p) => {
     (a[p.type] = a[p.type] || []).push(p.value);
     return a;
   }, {});
-  const metaLine = [
-    (metaParts.weekday || []).join('').toUpperCase(),
-    `${(metaParts.day || []).join('')} ${(metaParts.month || []).join('').toUpperCase()}`,
-    (metaParts.timeZoneName || []).join(''),
-  ].filter(Boolean).join(' · ');
+  resultDay.textContent = (meta.weekday || ['—']).join('').toUpperCase();
+  resultDate.textContent = `${(meta.day || []).join('')} ${(meta.month || []).join('').toUpperCase()}`;
+  resultZone.textContent = (meta.timeZoneName || ['—']).join('');
 
-  // Day diff
+  // Day-offset stamp
   const srcDay = refStr;
   const tgtDay = targetDate.toLocaleDateString('en-CA', { timeZone: toZone.value });
-  let dayTag = 'same day';
-  if (tgtDay > srcDay) dayTag = '+1 day';
-  else if (tgtDay < srcDay) dayTag = '−1 day';
+  let kind = 'same', en = 'Same day', jp = '同日';
+  if (tgtDay > srcDay) { kind = 'next'; en = '+1 day'; jp = '翌日'; }
+  else if (tgtDay < srcDay) { kind = 'prev'; en = '−1 day'; jp = '前日'; }
+  resultStamp.className = kind === 'same' ? 'stamp same' : 'stamp';
+  resultStamp.innerHTML = `${en}<span class="stamp-jp">${jp}</span>`;
+  resultStamp.hidden = false;
 
-  resultTime.innerHTML = `${hhmm}<span class="ampm">${ampm}</span>`;
-  resultMeta.textContent = metaLine;
-  resultNote.innerHTML = `<span class="day-tag">${dayTag}</span> &middot; from ${shortZone(fromZone.value)} ${pad(parsed.hour)}:${pad(parsed.minute)}`;
   resultEl.hidden = false;
-}
-
-function shortZone(tz) {
-  // City portion as a compact code, e.g. "Asia/Hong_Kong" → "HONG_KONG"
-  return (tz.split('/').pop() || tz).replace(/_/g, ' ').toUpperCase();
 }
 
 function parseTime(text) {

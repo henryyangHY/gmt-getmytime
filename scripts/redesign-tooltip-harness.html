@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../content/content.css">
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #fff; white-space: normal; }
+    body { padding: 28px; font-family: 'IBM Plex Mono', monospace; }
+    .stage { display: grid; grid-template-columns: repeat(3, 360px); gap: 28px; align-items: start; }
+    .tz-ext-tooltip { position: relative !important; opacity: 1 !important; transform: none !important; left: auto !important; top: auto !important; max-height: none !important; }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Time converted</span>
+      <div class="tz-ext-src"><strong>11:30 PM HKT</strong> &rarr; your time</div>
+      <div class="tz-ext-result">
+        <div class="tz-ext-result-top">
+          <div class="tz-ext-result-time">10:30<span class="tz-ext-ampm">PM</span></div>
+          <div class="tz-ext-stamp">−1 day<span class="tz-ext-stamp-jp">前日</span></div>
+        </div>
+        <div class="tz-ext-meta">
+          <div><div class="tz-ext-m-label">Day</div><div class="tz-ext-m-val">SUN</div></div>
+          <div><div class="tz-ext-m-label">Date</div><div class="tz-ext-m-val">31 MAY</div></div>
+          <div><div class="tz-ext-m-label">Zone</div><div class="tz-ext-m-val">CDT</div></div>
+        </div>
+      </div>
+      <a class="tz-ext-cal-btn" href="#">Add to Google Calendar &rarr;</a>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Range converted</span>
+      <div class="tz-ext-src"><strong>10:00–11:00 AM EST</strong> &rarr; your time</div>
+      <div class="tz-ext-result">
+        <div class="tz-ext-result-top">
+          <div class="tz-ext-result-time range">10:00<span class="tz-ext-ampm">PM</span><br>&ndash; 11:00<span class="tz-ext-ampm">PM</span></div>
+          <div class="tz-ext-stamp">+1 day<span class="tz-ext-stamp-jp">翌日</span></div>
+        </div>
+        <div class="tz-ext-meta">
+          <div><div class="tz-ext-m-label">Day</div><div class="tz-ext-m-val">MON</div></div>
+          <div><div class="tz-ext-m-label">Date</div><div class="tz-ext-m-val">01 JUN</div></div>
+          <div><div class="tz-ext-m-label">Zone</div><div class="tz-ext-m-val">HKT</div></div>
+        </div>
+      </div>
+      <a class="tz-ext-cal-btn" href="#">Add to Google Calendar &rarr;</a>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">No conversion needed</span>
+      <div class="tz-ext-src"><strong>10:30 AM CST</strong> &rarr; your time</div>
+      <div class="tz-ext-result">
+        <div class="tz-ext-result-top">
+          <div class="tz-ext-result-time">10:30<span class="tz-ext-ampm">AM</span></div>
+          <div class="tz-ext-stamp same">Same day<span class="tz-ext-stamp-jp">同日</span></div>
+        </div>
+        <div class="tz-ext-meta">
+          <div><div class="tz-ext-m-label">Day</div><div class="tz-ext-m-val">SUN</div></div>
+          <div><div class="tz-ext-m-label">Date</div><div class="tz-ext-m-val">31 MAY</div></div>
+          <div><div class="tz-ext-m-label">Zone</div><div class="tz-ext-m-val">CDT</div></div>
+        </div>
+      </div>
+      <a class="tz-ext-cal-btn" href="#">Add to Google Calendar &rarr;</a>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Treated as local</span>
+      <div class="tz-ext-src"><strong>11:30 PM</strong> &middot; no zone specified</div>
+      <div class="tz-ext-result">
+        <div class="tz-ext-result-top">
+          <div class="tz-ext-result-time">11:30<span class="tz-ext-ampm">PM</span></div>
+          <div class="tz-ext-stamp same">Same day<span class="tz-ext-stamp-jp">同日</span></div>
+        </div>
+        <div class="tz-ext-meta">
+          <div><div class="tz-ext-m-label">Day</div><div class="tz-ext-m-val">SUN</div></div>
+          <div><div class="tz-ext-m-label">Date</div><div class="tz-ext-m-val">31 MAY</div></div>
+          <div><div class="tz-ext-m-label">Zone</div><div class="tz-ext-m-val">CDT</div></div>
+        </div>
+      </div>
+      <a class="tz-ext-cal-btn" href="#">Add to Google Calendar &rarr;</a>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Pick a zone</span>
+      <div class="tz-ext-picker-q"><span class="tz-ext-q-red">"CST"</span> matches three zones</div>
+      <div class="tz-ext-pick-list">
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">US Central</span><span class="tz-ext-meta-r">GMT-6</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">China</span><span class="tz-ext-meta-r">GMT+8</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">Australia</span><span class="tz-ext-meta-r">GMT+9:30</span></button>
+      </div>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Where is this from?</span>
+      <div class="tz-ext-picker-q">No zone detected for <span class="tz-ext-q-red">11:30 PM</span></div>
+      <div class="tz-ext-pick-list">
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">US Eastern</span><span class="tz-ext-meta-r">NYC / TOR / MIA</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">US Central</span><span class="tz-ext-meta-r">CHI / DAL / MEX</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">US Mountain</span><span class="tz-ext-meta-r">DEN / PHX</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">US Pacific</span><span class="tz-ext-meta-r">LAX / SEA / SFO</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">United Kingdom</span><span class="tz-ext-meta-r">LON / LIS</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">Central Europe</span><span class="tz-ext-meta-r">PAR / BER / MAD</span></button>
+        <button class="tz-ext-amb-btn"><span class="tz-ext-name">Hong Kong / China</span><span class="tz-ext-meta-r">HK / SH / TPE</span></button>
+        <button class="tz-ext-amb-btn tz-ext-local-opt"><span class="tz-ext-name">It's already my time</span><span class="tz-ext-meta-r">↵</span></button>
+      </div>
+    </div>
+
+    <div class="tz-ext-tooltip" style="position:relative;opacity:1;transform:none;">
+      <span class="tz-ext-tag">Couldn't read</span>
+      <div class="tz-ext-err-mark">無</div>
+      <div class="tz-ext-err-sub">No time found in selection</div>
+    </div>
+  </div>
+</body>
+</html>
