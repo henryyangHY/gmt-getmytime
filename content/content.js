@@ -378,12 +378,12 @@
 
   // ── Tooltip ──
   let tooltip = null;
+  let tooltipHost = null;
 
   function removeTooltip() {
-    if (tooltip) { tooltip.remove(); tooltip = null; }
+    if (tooltipHost) { tooltipHost.remove(); tooltipHost = null; tooltip = null; }
   }
 
-  function showTooltipAtSelection(html) {
   function ensureFontsLoaded() {
     if (document.getElementById('tz-ext-fonts-link')) return;
     const pre1 = document.createElement('link');
@@ -398,53 +398,86 @@
     head.appendChild(pre1); head.appendChild(pre2); head.appendChild(link);
   }
 
+  function showTooltipAtSelection(html) {
     removeTooltip();
     ensureFontsLoaded();
+
+    // Outer host: isolated from page CSS via Shadow DOM
+    tooltipHost = document.createElement('div');
+    tooltipHost.className = 'tz-ext-host';
+    // Force a clean, host-page-immune wrapper. `all: initial` resets every inheritable
+    // and non-inheritable property the host page might apply via descendant selectors.
+    tooltipHost.style.cssText =
+      'all: initial !important;' +
+      'position: absolute !important;' +
+      'z-index: 2147483647 !important;' +
+      'left: 0 !important; top: 0 !important;' +
+      'margin: 0 !important; padding: 0 !important;' +
+      'pointer-events: none;';
+
+    const shadow = tooltipHost.attachShadow({ mode: 'open' });
+
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = chrome.runtime.getURL('content/content.css');
+    shadow.appendChild(styleLink);
+
     tooltip = document.createElement('div');
     tooltip.className = 'tz-ext-tooltip';
     tooltip.innerHTML = html;
-    document.body.appendChild(tooltip);
+    shadow.appendChild(tooltip);
 
-    const margin = 8;
-    const gap = 10;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    document.body.appendChild(tooltipHost);
 
-    const sel = window.getSelection();
-    let anchorX = vw / 2, anchorTop = vh / 2, anchorBottom = vh / 2;
-    if (sel && sel.rangeCount > 0) {
-      const rect = sel.getRangeAt(0).getBoundingClientRect();
-      anchorX = rect.left + rect.width / 2;
-      anchorTop = rect.top;
-      anchorBottom = rect.bottom;
-    }
+    const positionAndShow = () => {
+      const margin = 8;
+      const gap = 10;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
 
-    // Decide above vs below: prefer above if it fits naturally, else use whichever side has more room.
-    const naturalH = tooltip.getBoundingClientRect().height;
-    const spaceAbove = anchorTop - margin - gap;
-    const spaceBelow = vh - anchorBottom - margin - gap;
-    let placeBelow;
-    if (naturalH <= spaceAbove) placeBelow = false;
-    else if (naturalH <= spaceBelow) placeBelow = true;
-    else placeBelow = spaceBelow > spaceAbove;
+      const sel = window.getSelection();
+      let anchorX = vw / 2, anchorTop = vh / 2, anchorBottom = vh / 2;
+      if (sel && sel.rangeCount > 0) {
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        anchorX = rect.left + rect.width / 2;
+        anchorTop = rect.top;
+        anchorBottom = rect.bottom;
+      }
 
-    // Cap height to fit chosen side; CSS handles internal scroll.
-    const maxH = Math.max(160, placeBelow ? spaceBelow : spaceAbove);
-    tooltip.style.maxHeight = `${maxH}px`;
+      const naturalH = tooltip.getBoundingClientRect().height;
+      const spaceAbove = anchorTop - margin - gap;
+      const spaceBelow = vh - anchorBottom - margin - gap;
+      let placeBelow;
+      if (naturalH <= spaceAbove) placeBelow = false;
+      else if (naturalH <= spaceBelow) placeBelow = true;
+      else placeBelow = spaceBelow > spaceAbove;
 
-    const tRect = tooltip.getBoundingClientRect();
-    let left = anchorX - tRect.width / 2;
-    if (left < margin) left = margin;
-    if (left + tRect.width > vw - margin) left = vw - tRect.width - margin;
+      const maxH = Math.max(160, placeBelow ? spaceBelow : spaceAbove);
+      tooltip.style.maxHeight = `${maxH}px`;
 
-    let top = placeBelow ? (anchorBottom + gap) : (anchorTop - tRect.height - gap);
-    if (top < margin) top = margin;
-    if (top + tRect.height > vh - margin) top = vh - tRect.height - margin;
+      const tRect = tooltip.getBoundingClientRect();
+      let left = anchorX - tRect.width / 2;
+      if (left < margin) left = margin;
+      if (left + tRect.width > vw - margin) left = vw - tRect.width - margin;
 
-    tooltip.style.left = `${left + window.scrollX}px`;
-    tooltip.style.top = `${top + window.scrollY}px`;
-    tooltip.style.opacity = '1';
-    tooltip.style.transform = 'translateY(0)';
+      let top = placeBelow ? (anchorBottom + gap) : (anchorTop - tRect.height - gap);
+      if (top < margin) top = margin;
+      if (top + tRect.height > vh - margin) top = vh - tRect.height - margin;
+
+      tooltipHost.style.setProperty('left', `${left + window.scrollX}px`, 'important');
+      tooltipHost.style.setProperty('top', `${top + window.scrollY}px`, 'important');
+      tooltip.style.opacity = '1';
+      tooltip.style.transform = 'translateY(0)';
+    };
+
+    // Wait for shadow-DOM stylesheet to load before measuring sizes, otherwise the
+    // tooltip is unstyled at the moment we compute its bounding box and ends up
+    // positioned wrong (or flashes unstyled). Fall back to a small timeout in case
+    // onload never fires.
+    let shown = false;
+    const showOnce = () => { if (!shown) { shown = true; positionAndShow(); } };
+    styleLink.addEventListener('load', showOnce, { once: true });
+    setTimeout(showOnce, 120);
   }
 
   // ── Showa-style result helpers ──
@@ -642,7 +675,7 @@
 
   // Dismiss
   document.addEventListener('mousedown', (e) => {
-    if (tooltip && !tooltip.contains(e.target)) removeTooltip();
+    if (tooltipHost && !tooltipHost.contains(e.target)) removeTooltip();
   });
   document.addEventListener('scroll', removeTooltip, { passive: true });
 })();
