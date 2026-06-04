@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GMT v4 — Store Capture Scenarios</title>
+<style>
+  /* Realistic email-like canvas so screenshots look like real-world usage */
+  :root {
+    --paper:#f7f3ea;
+    --ink:#1a1814;
+    --ink-dim:#6b6358;
+    --line:#d6cfbf;
+    --accent:#0b66c3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #e8e2d4; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    padding: 56px 40px 200px;
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  .mailbox {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .mail-head {
+    padding: 22px 28px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #ffffff;
+  }
+  .mail-head .subj {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin-bottom: 6px;
+  }
+  .mail-head .meta {
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+  .mail-head .meta b { color: var(--ink); font-weight: 600; }
+  .scenario {
+    padding: 26px 28px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .scenario:last-child { border-bottom: 0; }
+  .scenario .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .scenario p { margin-bottom: 6px; }
+  .target {
+    background: #fff7d6;
+    padding: 1px 4px;
+    border-radius: 3px;
+    box-shadow: inset 0 -2px 0 #f5d57a;
+    cursor: text;
+  }
+  .anchor { scroll-margin-top: 80px; }
+</style>
+</head>
+<body>
+
+<div class="mailbox">
+  <div class="mail-head">
+    <div class="subj">RSG Kickoff &mdash; logistics &amp; schedule</div>
+    <div class="meta">
+      From <b>Recruiting Team</b> &nbsp;&middot;&nbsp; To you &nbsp;&middot;&nbsp; Mon, Jun 1
+    </div>
+  </div>
+
+  <!-- 1 · Single time, explicit unambiguous TZ -->
+  <div class="scenario anchor" id="sc-single">
+    <div class="tag">Scenario 1 &middot; explicit TZ</div>
+    <p>Your check-in slot is at <span class="target" data-case="single">11:30 PM HKT</span> on Monday. Please be on time.</p>
+  </div>
+
+  <!-- 2 · Time range with date -->
+  <div class="scenario anchor" id="sc-range">
+    <div class="tag">Scenario 2 &middot; time range</div>
+    <p>The mandatory check-in window runs <span class="target" data-case="range">Sep 22 from 2 PM to 5 PM CT</span>. Block your calendar accordingly.</p>
+  </div>
+
+  <!-- 3 · Ambiguous picker -->
+  <div class="scenario anchor" id="sc-ambig">
+    <div class="tag">Scenario 3 &middot; ambiguous abbreviation</div>
+    <p>Our partner in Asia proposed a sync at <span class="target" data-case="ambig">9 AM CST</span>. We'll need to pick which CST.</p>
+  </div>
+
+  <!-- 4 · No-TZ picker -->
+  <div class="scenario anchor" id="sc-notz">
+    <div class="tag">Scenario 4 &middot; no timezone written</div>
+    <p>RSVP for the welcome dinner: <span class="target" data-case="notz">5/13/2026 | 1:00 PM &ndash; 4:00 PM</span>. The invite forgot to mention the timezone.</p>
+  </div>
+
+  <!-- 5 · No-TZ converted (driven from same target as #4, then click pick) -->
+  <div class="scenario anchor" id="sc-notz-conv">
+    <div class="tag">Scenario 5 &middot; after picking US Central</div>
+    <p>Same dinner: <span class="target" data-case="notz-conv">5/13/2026 | 1:00 PM &ndash; 4:00 PM</span> &mdash; once you tell GMT it's US Central time, you get your local result instantly.</p>
+  </div>
+
+  <!-- 6 · Same time zone -->
+  <div class="scenario anchor" id="sc-same">
+    <div class="tag">Scenario 6 &middot; same zone (no conversion)</div>
+    <p>Local meeting starts at <span class="target" data-case="same">10:30 AM CT</span>. (Used when the source matches your machine TZ.)</p>
+  </div>
+
+  <!-- 7 · Error / no time -->
+  <div class="scenario anchor" id="sc-err">
+    <div class="tag">Scenario 7 &middot; nothing recognizable</div>
+    <p>If you select prose like <span class="target" data-case="err">just some random words</span>, the tooltip tells you it couldn't read a time.</p>
+  </div>
+</div>
+
+</body>
+</html>
