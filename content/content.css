@@ -118,8 +118,9 @@
   letter-spacing: -.01em;
 }
 .tz-ext-tooltip .tz-ext-result-time.range {
-  font-size: 30px;
-  line-height: 1.1;
+  font-size: 26px;
+  line-height: 1.05;
+  white-space: nowrap;
 }
 .tz-ext-tooltip .tz-ext-ampm {
   font-family: 'IBM Plex Mono', monospace !important;

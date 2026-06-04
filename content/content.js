@@ -556,7 +556,7 @@
     }
 
     const timeBlock = b2
-      ? `<div class="tz-ext-result-time range">${b1.timeHTML}<br>&ndash; ${b2.timeHTML}</div>`
+      ? `<div class="tz-ext-result-time range">${b1.timeHTML} &ndash; ${b2.timeHTML}</div>`
       : `<div class="tz-ext-result-time">${b1.timeHTML}</div>`;
 
     let html =
