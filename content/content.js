@@ -452,8 +452,14 @@
       else if (naturalH <= spaceBelow) placeBelow = true;
       else placeBelow = spaceBelow > spaceAbove;
 
+      // Only cap max-height when content genuinely needs scrolling, so we don't
+      // trigger a scrollbar (and ugly bottom bar) for tooltips that already fit.
       const maxH = Math.max(160, placeBelow ? spaceBelow : spaceAbove);
-      tooltip.style.maxHeight = `${maxH}px`;
+      if (naturalH > maxH) {
+        tooltip.style.maxHeight = `${maxH}px`;
+      } else {
+        tooltip.style.maxHeight = 'none';
+      }
 
       const tRect = tooltip.getBoundingClientRect();
       let left = anchorX - tRect.width / 2;
