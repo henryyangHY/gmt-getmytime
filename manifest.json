@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GMT(Get My Time) 時差轉換擴充插件",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "選取時間、右鍵轉換、一鍵加日曆 — Right-click to convert time zones. Handles ambiguous TZ, ranges, DST & Google Calendar.",
   "permissions": ["activeTab", "storage", "contextMenus", "scripting"],
   "action": {
